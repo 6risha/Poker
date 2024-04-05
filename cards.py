@@ -63,7 +63,7 @@ class Hand:
                     self.hole_cards[player] = []
                 self.hole_cards[player].append(card)
 
-                player.hole_cards.append(card)
+                # player.hole_cards.append(card)
 
     def deal_community_cards(self, num):
         for _ in range(num):
@@ -106,7 +106,7 @@ class Player:
     def __init__(self):
         self.name = 'John'
         self.chip_amount = 0
-        self.cards_held = []
+        self.hole_cards = []
 
     def fold(self):
         pass
@@ -120,8 +120,17 @@ class Player:
     def raise_bet(self):
         pass
 
-    def ask_action(self):
-        pass
+    def ask_action(self, choice):
+        res = choice.get()
+        if res == 'fold':
+            self.fold()
+        elif res == 'call':
+            self.call()
+        elif res == 'check':
+            self.check()
+        elif res == 'raise_bet':
+            self.raise_bet()
+        return res
 
     def bet(self, amount):
         pass
@@ -136,6 +145,6 @@ if __name__ == '__main__':
     deck.shuffle()
     print(deck)
 
-    game = Game(['Player1', 'Player2', 'Player3', 'Player4'])
+    game = Hand(['Player1', 'Player2', 'Player3', 'Player4'])
     game.deal_hole_cards()
     print(game.hole_cards)

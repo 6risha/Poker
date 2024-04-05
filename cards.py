@@ -72,6 +72,36 @@ class Game:
     def river(self):
         pass
 
+class Player:
+    
+    def __init__(self):
+        
+        self.name = 'john'
+        self.chip_amount = 0
+        self.cards_held = []
+        
+    def fold(self):
+        pass
+    
+    def call(self):
+        pass
+    
+    def check(self):
+        pass
+    
+    def raise_bet(self):
+        pass
+    
+    def ask_action(self):
+        pass
+    
+    def bet(self):
+        pass
+    
+    
+    
+class Bot(Player):
+    pass 
 
 if __name__ == '__main__':
     deck = Deck()

@@ -6,11 +6,11 @@ class Card:
         self.rank = rank
         # 0 - clubs (♣), 1 - diamonds (♦), 2 - hearts (♥), 3 - spades (♠)
         self.suit = suit
-        self.front_face = f'images/cards/{self.rank}_of_{['clubs', 'diamonds', 'hearts', 'spades'][self.suit]}.png'
+        self.front_face = f'images/cards/{self.rank}_of_{["clubs", "diamonds", "hearts", "spades"][self.suit]}.png'
         self.back_face = f'images/cards/red_back'
 
     def __str__(self):
-        return f'{self.rank}{['♣', '♦', '♥', '♠'][self.suit]}'
+        return f'{self.rank}{["♣", "♦", "♥", "♠"][self.suit]}'
 
 
 class Deck(list):

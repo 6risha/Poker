@@ -46,19 +46,43 @@ class Game:
         self.community_cards = []
         self.hole_cards = {}
 
+        # Bets
+        self.small_blind = 250
+        self.big_blind = 500
+        self.increasing_blinds = False
+
     def deal_hole_cards(self):
         # Imitation of real poker, each player is dealt one card at a time
         for _ in range(2):
             for i in range(self.num_players):
                 player_index = (self.dealer_position + i) % self.num_players
                 player = self.players[player_index]
+                card = self.deck.pop()
+
                 if player not in self.hole_cards:
                     self.hole_cards[player] = []
-                self.hole_cards[player].append(self.deck.pop())
+                self.hole_cards[player].append(card)
+
+                player.hole_cards.append(card)
 
     def deal_community_cards(self, num):
         for _ in range(num):
             self.community_cards.append(self.deck.pop())
+
+    def biding(self):
+        self.players[self.small_blind_position].bet(self.small_blind)
+        self.players[self.big_blind_position].bet(self.big_blind)
+
+        acts = []
+
+        for player in self.players[self.big_blind_position + 1:self.num_players]:
+            acts.append(player.ask_action())
+
+        acts.append(self.players[self.dealer_position].ask_action())
+
+        if 'raise' in acts:
+            pass
+
 
     def pre_flop(self):
         pass
@@ -72,36 +96,36 @@ class Game:
     def river(self):
         pass
 
+
 class Player:
-    
+
     def __init__(self):
-        
-        self.name = 'john'
+        self.name = 'John'
         self.chip_amount = 0
         self.cards_held = []
-        
+
     def fold(self):
         pass
-    
+
     def call(self):
         pass
-    
+
     def check(self):
         pass
-    
+
     def raise_bet(self):
         pass
-    
+
     def ask_action(self):
         pass
-    
-    def bet(self):
+
+    def bet(self, amount):
         pass
-    
-    
-    
+
+
 class Bot(Player):
-    pass 
+    pass
+
 
 if __name__ == '__main__':
     deck = Deck()

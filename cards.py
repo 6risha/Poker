@@ -28,7 +28,7 @@ class Deck(list):
         random.shuffle(self)
 
 
-class Game:
+class Hand:
     # This class is written for possible use for game of more than 2 players
     def __init__(self, players: list):
         # Players
@@ -69,20 +69,24 @@ class Game:
         for _ in range(num):
             self.community_cards.append(self.deck.pop())
 
-    def biding(self):
-        self.players[self.small_blind_position].bet(self.small_blind)
-        self.players[self.big_blind_position].bet(self.big_blind)
+    def bidding(self, current_player_index=0):
+        if current_player_index == self.dealer_position:
+            return
 
-        acts = []
+        current_player = self.players[current_player_index]
+        action = current_player.ask_action()
 
-        for player in self.players[self.big_blind_position + 1:self.num_players]:
-            acts.append(player.ask_action())
-
-        acts.append(self.players[self.dealer_position].ask_action())
-
-        if 'raise' in acts:
+        if action == 'raise':
+            pass
+        elif action == 'fold':
+            pass
+        elif action == 'call':
+            pass
+        elif action == 'check':
             pass
 
+        next_player_index = (current_player_index + 1) % self.num_players
+        self.bidding(next_player_index)
 
     def pre_flop(self):
         pass

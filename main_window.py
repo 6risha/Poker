@@ -8,8 +8,8 @@ class MainWindow(tk.Tk):
         self.title("Texas Holdem")
         self.geometry('1000x600')
 
-        #self.icon = tk.PhotoImage(file='images/icon.png')
-        #self.iconphoto(False, self.icon)
+        self.icon = tk.PhotoImage(file='images/icon.png')
+        self.iconphoto(False, self.icon)
 
         self.bg_color = 'gray18'
         self.fg_color = 'white'
@@ -17,6 +17,10 @@ class MainWindow(tk.Tk):
 
         self.main_menu = StartFrame(self)
         self.main_menu.pack(fill=tk.BOTH, expand=True)
+
+        self.settings = SettingsFrame(self)
+
+        self.game_frame = GameFrame(self)
 
 
 if __name__ == "__main__":

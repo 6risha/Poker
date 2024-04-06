@@ -29,11 +29,12 @@ class Deck(list):
 
 
 class Hand:
-    # This class is written for possible use for game of more than 2 players
+    # This class is implemented for possible use for game of more than 2 players
     def __init__(self, players: list):
         # Players
         self.players = players
-        self.num_players = len(self.players)
+        self.hand_players = players.copy()
+        self.num_players = len(self.hand_players)
 
         self.dealer_position = 0
         self.big_blind_position = (self.dealer_position + 1) % self.num_players
@@ -42,7 +43,6 @@ class Hand:
         # Cards
         self.deck = Deck()
         self.deck.shuffle()
-
         self.community_cards = []
         self.hole_cards = {}
 
@@ -51,58 +51,69 @@ class Hand:
         self.big_blind = 500
         self.increasing_blinds = False
 
+        self.bets = {player: 0 for player in self.hand_players}
+        self.pot = 0
+
+    def play(self):
+        self.deal_hole_cards()
+        # Preflop
+        self.bidding()
+        if self.num_players > 1:
+            # Flop
+            self.deal_community_cards(3)
+            self.bidding()
+            if self.num_players > 1:
+                # Turn
+                self.deal_community_cards(1)
+                self.bidding()
+                if self.num_players > 1:
+                    # River
+                    self.deal_community_cards(1)
+                    self.bidding()
+
+        self.divide_pot()
+        self.shift_dealer()
+        self.hand_players = self.players.copy()
+
+        # The function will be in the while loop until there is one player with all the chips
+        # TODO: change return for a proper one
+        return None
+
+    def shift_dealer(self):
+        self.dealer_position += 1
+        self.dealer_position %= self.num_players
+
     def deal_hole_cards(self):
         # Imitation of real poker, each player is dealt one card at a time
         for _ in range(2):
             for i in range(self.num_players):
                 player_index = (self.dealer_position + i) % self.num_players
-                player = self.players[player_index]
+                player = self.hand_players[player_index]
                 card = self.deck.pop()
 
                 if player not in self.hole_cards:
                     self.hole_cards[player] = []
                 self.hole_cards[player].append(card)
 
-                # player.hole_cards.append(card)
+                player.hole_cards.append(card)
 
     def deal_community_cards(self, num):
         for _ in range(num):
             self.community_cards.append(self.deck.pop())
 
-    def bidding(self, current_player_index=0):
-        if current_player_index == self.dealer_position:
-            return
-
-        current_player = self.players[current_player_index]
-        action = current_player.ask_action()
-
-        if action == 'raise':
-            pass
-        elif action == 'fold':
-            pass
-        elif action == 'call':
-            pass
-        elif action == 'check':
-            pass
-
-        next_player_index = (current_player_index + 1) % self.num_players
-        self.bidding(next_player_index)
-
-    def pre_flop(self):
+    def equal_bets(self):
         pass
 
-    def flop(self):
-        pass
+    def bidding(self):
+        # The bidding process continues until the bets are equal
+        while not self.equal_bets():
+            pass
 
-    def turn(self):
-        pass
-
-    def river(self):
+    def divide_pot(self):
         pass
 
 
 class Player:
-
     def __init__(self):
         self.name = 'John'
         self.chip_amount = 0
@@ -120,16 +131,9 @@ class Player:
     def raise_bet(self):
         pass
 
-    def ask_action(self, choice):
+    @staticmethod
+    def ask_action(choice):
         res = choice.get()
-        if res == 'fold':
-            self.fold()
-        elif res == 'call':
-            self.call()
-        elif res == 'check':
-            self.check()
-        elif res == 'raise_bet':
-            self.raise_bet()
         return res
 
     def bet(self, amount):
@@ -137,7 +141,9 @@ class Player:
 
 
 class Bot(Player):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.name = random.choice(['John', 'Bob'])
 
 
 if __name__ == '__main__':
@@ -145,6 +151,11 @@ if __name__ == '__main__':
     deck.shuffle()
     print(deck)
 
-    game = Hand(['Player1', 'Player2', 'Player3', 'Player4'])
+    player1 = Player()
+    player2 = Player()
+    player3 = Player()
+    players = [player1, player2, player3]
+
+    game = Hand(players)
     game.deal_hole_cards()
     print(game.hole_cards)

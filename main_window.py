@@ -5,7 +5,7 @@ from frames import *
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Texas Holdem")
+        self.title('Texas Holdem')
         self.geometry('1000x600')
 
         self.icon = tk.PhotoImage(file='images/icon.png')
@@ -19,7 +19,6 @@ class MainWindow(tk.Tk):
         self.main_menu.pack(fill=tk.BOTH, expand=True)
 
         self.settings = SettingsFrame(self)
-
         self.game_frame = GameFrame(self)
 
 

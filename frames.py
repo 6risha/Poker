@@ -76,7 +76,7 @@ class SettingsFrame(tk.Frame):
         # Blind increase
         self.blind_increase_speed = tk.IntVar()
         self.blind_increase_speed.set(0)
-        self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=250, label='Blind increase',
+        self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=300, label='Blind increase',
                                variable=self.blind_increase_speed, tickinterval=1, font=self.small_font)
         self.scale3.pack(pady=30, padx=10)
 

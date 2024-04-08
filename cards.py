@@ -130,20 +130,22 @@ class Hand:
             while True:
                 if act[0] == 'fold':
                     # just out of the game and pass to the next player
-                    # index does not change, next player will be automatically at this place
+                    # index does not change (except the border case), next player will be automatically at this place
                     self.hand_players.pop(i)
                     i = i % len(self.hand_players)
                     break
 
                 elif act[0] == 'check':
-                    # pass to the next player if the player already has the highest bet
+                    # player passes to the next player if he already has the highest bet
                     if self.bets[self.hand_players[i]] == max:
                         i = (i + 1) % len(self.hand_players)
                         break
                     else:
-                        print('Bad Action!')
+                        print('Impossible action!')
+                        act = self.hand_players[i].ask_action()
 
                 elif act[0] == 'call':
+                    # TODO
                     # player equates his to bet to the highest one
                     # Current bet
                     current_bet = 0
@@ -155,6 +157,7 @@ class Hand:
                         i = (i + 1) % len(self.hand_players)
 
                 elif act[0] == 'raise':
+                    # TODO
                     if act[1] == self.hand_players[i].chips_amount:
                         # All-in case
                         pass
@@ -162,7 +165,8 @@ class Hand:
                         # Usual raise
                         pass
                     else:
-                        print('Bad Action!')
+                        print('Impossible action!')
+                        act = self.hand_players[i].ask_action()
 
     def divide_pot(self):
         # Consider equal combinations

@@ -34,11 +34,10 @@ class Hand:
         # Players
         self.players = players
         self.hand_players = players.copy()
-        self.num_players = len(self.hand_players)
 
         self.dealer_position = 0
-        self.big_blind_position = (self.dealer_position + 1) % self.num_players
-        self.small_blind_position = (self.dealer_position + 2) % self.num_players
+        self.big_blind_position = (self.dealer_position + 1) % len(self.hand_players)
+        self.small_blind_position = (self.dealer_position + 2) % len(self.hand_players)
 
         # Cards
         self.deck = Deck()
@@ -57,16 +56,16 @@ class Hand:
     def play(self):
         self.deal_hole_cards()
         # Preflop
-        self.bidding()
-        if self.num_players > 1:
+        self.bidding(preflop=True)
+        if len(self.hand_players) > 1:
             # Flop
             self.deal_community_cards(3)
             self.bidding()
-            if self.num_players > 1:
+            if len(self.hand_players) > 1:
                 # Turn
                 self.deal_community_cards(1)
                 self.bidding()
-                if self.num_players > 1:
+                if len(self.hand_players) > 1:
                     # River
                     self.deal_community_cards(1)
                     self.bidding()
@@ -81,14 +80,14 @@ class Hand:
 
     def shift_dealer(self):
         self.dealer_position += 1
-        self.dealer_position %= self.num_players
+        self.dealer_position %= len(self.hand_players)
 
     def deal_hole_cards(self):
         # Imitation of real poker, each player is dealt one card at a time
         for _ in range(2):
-            for i in range(self.num_players):
-                player_index = (self.dealer_position + i) % self.num_players
-                player = self.hand_players[player_index]
+            for i in range(len(self.players)):
+                player_index = (self.dealer_position + i) % len(self.players)
+                player = self.players[player_index]
                 card = self.deck.pop()
 
                 if player not in self.hole_cards:
@@ -102,34 +101,79 @@ class Hand:
             self.community_cards.append(self.deck.pop())
 
     def equal_bets(self):
-        pass
+        res = True
+        bet = self.bets[self.hand_players[0]]
+        for player in self.hand_players:
+            if bet != self.bets[player]:
+                res = False
+        return res
 
-    def bidding(self):
-        # The bidding process continues until the bets are equal
-        while not self.equal_bets():
-            pass
+    def bidding(self, preflop=False):
+        # The bidding process continues until:
+        # the bets are equal and
+        # all the players are asked about their actions and
+        # the amount of players in the hand is more than 1
+        asked = []
+        if preflop:
+            self.hand_players[self.small_blind_position].bet(self.small_blind)
+            self.hand_players[self.big_blind_position].bet(self.big_blind)
+            i = self.big_blind_position + 1
+        else:
+            i = self.dealer_position + 1
+            while i in range(len(self.players)) and self.players[i] not in self.hand_players:
+                i += 1
+
+        while len(self.hand_players) > 1 and not self.equal_bets() and not set(asked) == set(self.hand_players):
+            act = self.hand_players[i].ask_action()
+            asked.append(self.hand_players[i])
+
+            while True:
+                if act[0] == 'fold':
+                    # just out of the game and pass to the next player
+                    # index does not change, next player will be automatically at this place
+                    self.hand_players.pop(i)
+                    i = i % len(self.hand_players)
+                    break
+
+                elif act[0] == 'check':
+                    # pass to the next player if the player already has the highest bet
+                    if self.bets[self.hand_players[i]] == max:
+                        i = (i + 1) % len(self.hand_players)
+                        break
+                    else:
+                        print('Bad Action!')
+
+                elif act[0] == 'call':
+                    # player equates his to bet to the highest one
+                    # Current bet
+                    current_bet = 0
+                    # Maximum bet
+                    max_bet = 0
+                    # Equate
+                    if self.hand_players[i].chips_amount - (max_bet - current_bet) > 0:
+                        pass
+                        i = (i + 1) % len(self.hand_players)
+
+                elif act[0] == 'raise':
+                    if act[1] == self.hand_players[i].chips_amount:
+                        # All-in case
+                        pass
+                    elif act[1] < self.hand_players[i].chips_amount:
+                        # Usual raise
+                        pass
+                    else:
+                        print('Bad Action!')
 
     def divide_pot(self):
+        # Consider equal combinations
         pass
 
 
 class Player:
     def __init__(self):
         self.name = 'John'
-        self.chip_amount = 0
+        self.chips_amount = 0
         self.hole_cards = []
-
-    def fold(self):
-        pass
-
-    def call(self):
-        pass
-
-    def check(self):
-        pass
-
-    def raise_bet(self):
-        pass
 
     @staticmethod
     def ask_action(choice):
@@ -137,6 +181,7 @@ class Player:
         return res
 
     def bet(self, amount):
+        # Consider the all-in bets in the game (not to forget about all-in at blinds)
         pass
 
 

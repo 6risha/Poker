@@ -28,16 +28,21 @@ class Deck(list):
         random.shuffle(self)
 
 
-class Hand:
+class Game:
     # This class is implemented for possible use for game of more than 2 players
-    def __init__(self, players: list):
+    def __init__(self, players: list['Player']):
+        # Link players to the game
+        for player in players:
+            player.game = self
+
         # Players
         self.players = players
         self.hand_players = players.copy()
+        self.all_in_players = []
 
-        self.dealer_position = 0
-        self.big_blind_position = (self.dealer_position + 1) % len(self.hand_players)
-        self.small_blind_position = (self.dealer_position + 2) % len(self.hand_players)
+        self.dealer_pos = 0
+        self.bb_pos = (self.dealer_pos + 1) % len(self.hand_players)
+        self.sb_pos = (self.dealer_pos + 2) % len(self.hand_players)
 
         # Cards
         self.deck = Deck()
@@ -79,14 +84,14 @@ class Hand:
         return None
 
     def shift_dealer(self):
-        self.dealer_position += 1
-        self.dealer_position %= len(self.hand_players)
+        self.dealer_pos += 1
+        self.dealer_pos %= len(self.hand_players)
 
     def deal_hole_cards(self):
         # Imitation of real poker, each player is dealt one card at a time
         for _ in range(2):
             for i in range(len(self.players)):
-                player_index = (self.dealer_position + i) % len(self.players)
+                player_index = (self.dealer_pos + i) % len(self.players)
                 player = self.players[player_index]
                 card = self.deck.pop()
 
@@ -115,11 +120,13 @@ class Hand:
         # the amount of players in the hand is more than 1
         asked = []
         if preflop:
-            self.hand_players[self.small_blind_position].bet(self.small_blind)
-            self.hand_players[self.big_blind_position].bet(self.big_blind)
-            i = self.big_blind_position + 1
+            # 2 players clockwise from dealer bet SB and BB, next player after BB starts
+            self.hand_players[self.sb_pos].bet(self.small_blind)
+            self.hand_players[self.bb_pos].bet(self.big_blind)
+            i = self.bb_pos + 1
         else:
-            i = self.dealer_position + 1
+            # Closest player clockwise to the dealer starts
+            i = self.dealer_pos + 1
             while i in range(len(self.players)) and self.players[i] not in self.hand_players:
                 i += 1
 
@@ -129,7 +136,7 @@ class Hand:
 
             while True:
                 if act[0] == 'fold':
-                    # just out of the game and pass to the next player
+                    # the player is out of the game and pass to the next player
                     # index does not change (except the border case), next player will be automatically at this place
                     self.hand_players.pop(i)
                     i = i % len(self.hand_players)
@@ -152,41 +159,52 @@ class Hand:
                     # Maximum bet
                     max_bet = 0
                     # Equate
-                    if self.hand_players[i].chips_amount - (max_bet - current_bet) > 0:
+                    if self.hand_players[i].chips - (max_bet - current_bet) > 0:
                         pass
                         i = (i + 1) % len(self.hand_players)
 
                 elif act[0] == 'raise':
                     # TODO
-                    if act[1] == self.hand_players[i].chips_amount:
-                        # All-in case
-                        pass
-                    elif act[1] < self.hand_players[i].chips_amount:
-                        # Usual raise
-                        pass
+                    if act[1] <= self.hand_players[i].chips:
+                        # All-in case and usual case
+                        self.hand_players[i].bet(act[1])
                     else:
                         print('Impossible action!')
                         act = self.hand_players[i].ask_action()
 
     def divide_pot(self):
-        # Consider equal combinations
+        # TODO: consider equal combinations
         pass
 
 
 class Player:
     def __init__(self):
         self.name = 'John'
-        self.chips_amount = 0
+        self.game = None
+        self.chips = 0
+        # We need to provide every player to see its own hole cards
+        # So we create a duplicate in this class
         self.hole_cards = []
 
     @staticmethod
     def ask_action(choice):
+        # TODO: the function should return a tuple (action, bet)
         res = choice.get()
         return res
 
     def bet(self, amount):
-        # Consider the all-in bets in the game (not to forget about all-in at blinds)
-        pass
+        # TODO: consider the all-in bets in the game (not to forget about all-in at blinds)
+        if amount >= self.chips:
+            # All in case
+            # Amount of asked bet can be greater than the amount of chips on blinds
+            self.game.bets[self] += self.chips
+            self.game.pot += self.chips
+            self.chips = 0
+            self.game.all_in_players.append(self)
+        else:
+            self.chips -= amount
+            self.game.bets[self] += amount
+            self.game.pot += amount
 
 
 class Bot(Player):
@@ -205,6 +223,6 @@ if __name__ == '__main__':
     player3 = Player()
     players = [player1, player2, player3]
 
-    game = Hand(players)
+    game = Game(players)
     game.deal_hole_cards()
     print(game.hole_cards)

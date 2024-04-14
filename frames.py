@@ -22,14 +22,28 @@ class StartFrame(tk.Frame):
         self.label_2.pack(side=tk.TOP)
         self.label_2.bind('<Enter>', lambda event, lbl=self.label_2: self.on_enter(lbl, event))
         self.label_2.bind('<Leave>', lambda event, lbl=self.label_2: self.on_leave(lbl, event))
-        self.label_2.bind('<Button-1>', lambda event: self.start_game(event))
+        self.label_2.bind('<Button-1>', lambda event: self.open_next('Game', event))
 
-        self.label_3 = tk.Label(self, text='Settings', font=self.small_font, bg=self.window.bg_color,
+        self.label_3 = tk.Label(self, text='Tutorials', font=self.small_font, bg=self.window.bg_color,
                                 fg=self.window.fg_color)
-        self.label_3.pack(side=tk.BOTTOM, pady=(0, 50))
+        self.label_3.pack(side=tk.TOP, pady=(100, 0))
         self.label_3.bind('<Enter>', lambda event, lbl=self.label_3: self.on_enter(lbl, event))
         self.label_3.bind('<Leave>', lambda event, lbl=self.label_3: self.on_leave(lbl, event))
-        self.label_3.bind('<Button-1>', lambda event: self.open_settings(event))
+        self.label_3.bind('<Button-1>', lambda event: self.open_next('Tutorials', event))
+
+        self.label_4 = tk.Label(self, text='Analysis', font=self.small_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
+        self.label_4.pack(side=tk.TOP)
+        self.label_4.bind('<Enter>', lambda event, lbl=self.label_4: self.on_enter(lbl, event))
+        self.label_4.bind('<Leave>', lambda event, lbl=self.label_4: self.on_leave(lbl, event))
+        self.label_4.bind('<Button-1>', lambda event: self.open_next('Analysis', event))
+
+        self.label_5 = tk.Label(self, text='Settings', font=self.small_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
+        self.label_5.pack(side=tk.TOP)
+        self.label_5.bind('<Enter>', lambda event, lbl=self.label_5: self.on_enter(lbl, event))
+        self.label_5.bind('<Leave>', lambda event, lbl=self.label_5: self.on_leave(lbl, event))
+        self.label_5.bind('<Button-1>', lambda event: self.open_next('Settings', event))
 
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
@@ -37,13 +51,16 @@ class StartFrame(tk.Frame):
     def on_leave(self, label, event):
         label.config(fg=self.window.fg_color)
 
-    def start_game(self, event):
+    def open_next(self, menu, event):
         self.pack_forget()
-        self.window.game_frame.pack()
-
-    def open_settings(self, event):
-        self.pack_forget()
-        self.window.settings_frame.pack(fill=tk.BOTH, expand=True)
+        if menu == 'Game':
+            self.window.game_frame.pack(fill=tk.BOTH, expand=True)
+        elif menu == 'Tutorials':
+            self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
+        elif menu == 'Analysis':
+            self.window.analysis_frame.pack(fill=tk.BOTH, expand=True)
+        elif menu == 'Settings':
+            self.window.settings_frame.pack(fill=tk.BOTH, expand=True)
 
 
 class SettingsFrame(tk.Frame):
@@ -74,11 +91,29 @@ class SettingsFrame(tk.Frame):
         self.scale2.pack(pady=30, padx=10)
 
         # Blind increase
-        self.blind_increase_speed = tk.IntVar()
-        self.blind_increase_speed.set(0)
+        self.blind_increase = tk.IntVar()
+        self.blind_increase.set(0)
         self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=300, label='Blind increase',
-                               variable=self.blind_increase_speed, tickinterval=1, font=self.small_font)
+                               variable=self.blind_increase, tickinterval=1, font=self.small_font)
         self.scale3.pack(pady=30, padx=10)
+
+        # Exit button
+        self.label_1 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
+        self.label_1.pack()
+        self.label_1.bind('<Enter>', lambda event, lbl=self.label_1: self.on_enter(lbl, event))
+        self.label_1.bind('<Leave>', lambda event, lbl=self.label_1: self.on_leave(lbl, event))
+        self.label_1.bind('<Button-1>', lambda event: self.exit(event))
+
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def exit(self, event):
+        self.pack_forget()
+        self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
 
 class GameFrame(tk.Frame):

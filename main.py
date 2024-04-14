@@ -18,10 +18,10 @@ class MainWindow(tk.Tk):
         self.start_frame = StartFrame(self)
         self.start_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.settings_frame = SettingsFrame(self)
         self.game_frame = GameFrame(self)
         self.tutorials_frame = TutorialsFrame(self)
         self.analysis_frame = AnalysisFrame(self)
+        self.settings_frame = SettingsFrame(self)
 
 
 if __name__ == "__main__":

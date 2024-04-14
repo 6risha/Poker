@@ -15,11 +15,13 @@ class MainWindow(tk.Tk):
         self.fg_color = 'white'
         self.accent_color = 'red'
 
-        self.main_menu = StartFrame(self)
-        self.main_menu.pack(fill=tk.BOTH, expand=True)
+        self.start_frame = StartFrame(self)
+        self.start_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.settings = SettingsFrame(self)
+        self.settings_frame = SettingsFrame(self)
         self.game_frame = GameFrame(self)
+        self.tutorials_frame = TutorialsFrame(self)
+        self.analysis_frame = AnalysisFrame(self)
 
 
 if __name__ == "__main__":

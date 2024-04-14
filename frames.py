@@ -43,7 +43,7 @@ class StartFrame(tk.Frame):
 
     def open_settings(self, event):
         self.pack_forget()
-        self.window.settings.pack(fill=tk.BOTH, expand=True)
+        self.window.settings_frame.pack(fill=tk.BOTH, expand=True)
 
 
 class SettingsFrame(tk.Frame):
@@ -82,5 +82,15 @@ class SettingsFrame(tk.Frame):
 
 
 class GameFrame(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+
+
+class TutorialsFrame(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+
+
+class AnalysisFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)

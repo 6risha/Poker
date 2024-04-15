@@ -70,7 +70,7 @@ class SettingsFrame(tk.Frame):
         self.configure(bg=self.window.bg_color)
 
         self.big_font = ('Courier New', 40, 'bold')
-        self.small_font = ('Courier New', 25, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
 
         # Set blinds sizes
         self.blind_size = tk.DoubleVar()

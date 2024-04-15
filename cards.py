@@ -41,8 +41,14 @@ class Game:
         self.all_in_players = []
 
         self.dealer_pos = 0
-        self.bb_pos = (self.dealer_pos + 1) % len(self.hand_players)
-        self.sb_pos = (self.dealer_pos + 2) % len(self.hand_players)
+        if len(self.players) > 2:
+            # General case
+            self.sb_pos = (self.dealer_pos + 1) % len(self.hand_players)
+            self.bb_pos = (self.dealer_pos + 2) % len(self.hand_players)
+        elif len(self.players) == 2:
+            # Case of heads-up poker
+            self.sb_pos = self.dealer_pos
+            self.bb_pos = (self.dealer_pos + 1) % len(self.hand_players)
 
         # Cards
         self.deck = Deck()
@@ -59,33 +65,42 @@ class Game:
         self.pot = 0
 
     def play(self):
-        self.deal_hole_cards()
-        # Preflop
-        self.bidding(preflop=True)
-        if len(self.hand_players) > 1:
-            # Flop
-            self.deal_community_cards(3)
-            self.bidding()
+        while True:
+            self.deal_hole_cards()
+            # Preflop
+            self.bidding(preflop=True)
             if len(self.hand_players) > 1:
-                # Turn
-                self.deal_community_cards(1)
+                # Flop
+                self.deal_community_cards(3)
                 self.bidding()
                 if len(self.hand_players) > 1:
-                    # River
+                    # Turn
                     self.deal_community_cards(1)
                     self.bidding()
+                    if len(self.hand_players) > 1:
+                        # River
+                        self.deal_community_cards(1)
+                        self.bidding()
 
-        self.divide_pot()
-        self.shift_dealer()
-        self.hand_players = self.players.copy()
+            self.divide_pot()
 
-        # The function will be in the while loop until there is one player with all the chips
-        # TODO: change return for a proper one
-        return None
+            self.hand_players = []
+            for player in self.players:
+                if player.chips > 0:
+                    self.hand_players.append(player)
 
-    def shift_dealer(self):
-        self.dealer_pos += 1
-        self.dealer_pos %= len(self.hand_players)
+            if len(self.hand_players) == 1:
+                return f'winner: {self.hand_players[0]}'
+
+            self.shift_dealer_and_blinds()
+
+    def shift_dealer_and_blinds(self):
+        if len(self.hand_players) == 2:
+            # Heads up case
+            pass
+        else:
+            # General case
+            pass
 
     def deal_hole_cards(self):
         # Imitation of real poker, each player is dealt one card at a time
@@ -106,12 +121,11 @@ class Game:
             self.community_cards.append(self.deck.pop())
 
     def equal_bets(self):
-        res = True
-        bet = self.bets[self.hand_players[0]]
-        for player in self.hand_players:
-            if bet != self.bets[player]:
-                res = False
-        return res
+        return all(self.bets[player] == self.bets[self.hand_players[0]] for player in self.hand_players)
+
+    def everyone_is_asked(self):
+        # TODO
+        pass
 
     def bidding(self, preflop=False):
         # The bidding process continues until:
@@ -123,14 +137,17 @@ class Game:
             # 2 players clockwise from dealer bet SB and BB, next player after BB starts
             self.hand_players[self.sb_pos].bet(self.small_blind)
             self.hand_players[self.bb_pos].bet(self.big_blind)
-            i = self.bb_pos + 1
+            i = (self.bb_pos + 1) % len(self.hand_players)
         else:
             # Closest player clockwise to the dealer starts
             i = self.dealer_pos + 1
             while i in range(len(self.players)) and self.players[i] not in self.hand_players:
                 i += 1
 
-        while len(self.hand_players) > 1 and not self.equal_bets() and not set(asked) == set(self.hand_players):
+        while True:
+            if (self.equal_bets() and self.everyone_is_asked) or (len(self.hand_players) <= 1):
+                break
+
             act = self.hand_players[i].ask_action()
             asked.append(self.hand_players[i])
 
@@ -144,7 +161,8 @@ class Game:
 
                 elif act[0] == 'check':
                     # player passes to the next player if he already has the highest bet
-                    if self.bets[self.hand_players[i]] == max:
+                    max_bet = max(self.bets.values())
+                    if self.bets[self.hand_players[i]] == max_bet:
                         i = (i + 1) % len(self.hand_players)
                         break
                     else:
@@ -152,25 +170,38 @@ class Game:
                         act = self.hand_players[i].ask_action()
 
                 elif act[0] == 'call':
-                    # TODO
                     # player equates his to bet to the highest one
-                    # Current bet
-                    current_bet = 0
-                    # Maximum bet
-                    max_bet = 0
-                    # Equate
-                    if self.hand_players[i].chips - (max_bet - current_bet) > 0:
-                        pass
-                        i = (i + 1) % len(self.hand_players)
+                    current_bet = self.bets[self.hand_players[i]]
+                    max_bet = max(self.bets.values())
+                    bet = max_bet - current_bet
 
-                elif act[0] == 'raise':
-                    # TODO
-                    if act[1] <= self.hand_players[i].chips:
-                        # All-in case and usual case
-                        self.hand_players[i].bet(act[1])
+                    if self.hand_players[i].chips - bet > 0:
+                        self.hand_players[i].bet(bet)
+                        i = (i + 1) % len(self.hand_players)
+                        break
                     else:
                         print('Impossible action!')
                         act = self.hand_players[i].ask_action()
+
+                elif act[0] == 'raise':
+                    if act[1] < self.hand_players[i].chips:
+                        self.hand_players[i].bet(act[1])
+                        i = (i + 1) % len(self.hand_players)
+                        break
+                    else:
+                        print('Impossible action!')
+                        act = self.hand_players[i].ask_action()
+
+                elif act[0] == 'all_in':
+                    if self.hand_players[i].chips > 0:
+                        self.bets[self.hand_players[i]] += self.hand_players[i].chips
+                        self.hand_players[i].chips = 0
+                        self.all_in_players.append(self.hand_players[i])
+                        self.hand_players.pop(i)
+                        i = i % len(self.hand_players)
+                        break
+                    else:
+                        raise ValueError('Negative balance!')
 
     def divide_pot(self):
         # TODO: consider equal combinations
@@ -186,22 +217,34 @@ class Player:
         # So we create a duplicate in this class
         self.hole_cards = []
 
-    @staticmethod
-    def ask_action(choice):
-        # TODO: the function should return a tuple (action, bet)
-        res = choice.get()
+    def __str__(self):
+        return self.name
+
+    def ask_action(self):
+        # Returns a tuple (action, bet)
+        action = input(f'{self.name} action: ')
+        bet = 0
+        if action == 'raise':
+            bet = int(input(f'{self.name} bet: '))
+        elif action == 'call':
+            if self.game is not None:
+                bet = max(game.bets.values())
+
+        res = (action, bet)
+        # res = choice.get()
         return res
 
     def bet(self, amount):
-        # TODO: consider the all-in bets in the game (not to forget about all-in at blinds)
         if amount >= self.chips:
             # All in case
-            # Amount of asked bet can be greater than the amount of chips on blinds
-            self.game.bets[self] += self.chips
-            self.game.pot += self.chips
-            self.chips = 0
-            self.game.all_in_players.append(self)
+            # Amount of asked bet can be greater than the amount of chips on blinds, but player shouldn't be all in yet
+            if self.chips > 0:
+                self.game.bets[self] += self.chips
+                self.game.pot += self.chips
+                self.chips = 0
+                self.game.all_in_players.append(self)
         else:
+            # Usual case
             self.chips -= amount
             self.game.bets[self] += amount
             self.game.pot += amount
@@ -214,15 +257,15 @@ class Bot(Player):
 
 
 if __name__ == '__main__':
-    deck = Deck()
-    deck.shuffle()
-    print(deck)
-
     player1 = Player()
+    player1.chips = 10000
     player2 = Player()
+    player2.chips = 10000
+    player2.name = 'Bob'
     player3 = Player()
+    player3.chips = 10000
+    player3.name = 'Stefan'
     players = [player1, player2, player3]
 
     game = Game(players)
-    game.deal_hole_cards()
-    print(game.hole_cards)
+    game.play()

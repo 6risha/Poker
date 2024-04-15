@@ -10,7 +10,9 @@ class Card:
         self.back_face = f'images/cards/red_back'
 
     def __str__(self):
-        return f'{self.rank}{["♣", "♦", "♥", "♠"][self.suit]}'
+        if self.rank > 10:
+            return {11: 'J', 12: 'Q', 13: 'K', 14: 'A'}[self.rank] + ['♣', '♦', '♥', '♠'][self.suit]
+        return str(self.rank) + ['♣', '♦', '♥', '♠'][self.suit]
 
 
 class Deck(list):
@@ -121,18 +123,28 @@ class Game:
             self.community_cards.append(self.deck.pop())
 
     def equal_bets(self):
-        return all(self.bets[player] == self.bets[self.hand_players[0]] for player in self.hand_players)
+        # TODO: REWRITE
+        bets = set()
+        for player in self.hand_players:
+            if player not in self.all_in_players:
+                bets.add(self.bets[player])
+        if len(bets) == 1:
+            return True
+        else:
+            return False
 
-    def everyone_is_asked(self):
-        # TODO
-        pass
+    def everyone_is_asked(self, asked):
+        for player in self.hand_players:
+            if player not in asked:
+                return False
+        return True
 
     def bidding(self, preflop=False):
         # The bidding process continues until:
         # the bets are equal and
         # all the players are asked about their actions and
         # the amount of players in the hand is more than 1
-        asked = []
+        asked = set()
         if preflop:
             # 2 players clockwise from dealer bet SB and BB, next player after BB starts
             self.hand_players[self.sb_pos].bet(self.small_blind)
@@ -140,22 +152,24 @@ class Game:
             i = (self.bb_pos + 1) % len(self.hand_players)
         else:
             # Closest player clockwise to the dealer starts
-            i = self.dealer_pos + 1
-            while i in range(len(self.players)) and self.players[i] not in self.hand_players:
-                i += 1
+            i = (self.dealer_pos + 1) % len(self.hand_players)
 
-        while True:
-            if (self.equal_bets() and self.everyone_is_asked) or (len(self.hand_players) <= 1):
-                break
+        while not ((self.equal_bets() and self.everyone_is_asked(asked)) or (len(self.hand_players) <= 1)):
+            # Player who is all in does nat make any actions more, but he still plays this hand
+            if self.hand_players[i] in self.all_in_players:
+                i = (i+1) % len(self.hand_players)
 
             act = self.hand_players[i].ask_action()
-            asked.append(self.hand_players[i])
+            asked.add(self.hand_players[i])
 
             while True:
                 if act[0] == 'fold':
                     # the player is out of the game and pass to the next player
                     # index does not change (except the border case), next player will be automatically at this place
                     self.hand_players.pop(i)
+                    # VERY IMPORTANT SHIFT
+                    if i == self.dealer_pos:
+                        self.dealer_pos = -1
                     i = i % len(self.hand_players)
                     break
 
@@ -197,15 +211,28 @@ class Game:
                         self.bets[self.hand_players[i]] += self.hand_players[i].chips
                         self.hand_players[i].chips = 0
                         self.all_in_players.append(self.hand_players[i])
-                        self.hand_players.pop(i)
                         i = i % len(self.hand_players)
                         break
                     else:
                         raise ValueError('Negative balance!')
 
+        print('The bids are made the bidding is over.')
+
     def divide_pot(self):
-        # TODO: consider equal combinations
-        pass
+        winners = self.determine_winners()
+
+        if len(winners) == 1:
+            winning_amount = self.pot
+        else:
+            winning_amount = self.pot // len(winners)
+
+        for winner in winners:
+            winner.chips += winning_amount
+
+        self.pot = 0
+
+    def determine_winners(self):
+        return []
 
 
 class Player:
@@ -218,14 +245,15 @@ class Player:
         self.hole_cards = []
 
     def __str__(self):
-        return self.name
+        hole_cards_str = ', '.join(str(card) for card in self.hole_cards)
+        return f'{self.name} | {self.chips} | {hole_cards_str} | '
 
     def ask_action(self):
         # Returns a tuple (action, bet)
-        action = input(f'{self.name} action: ')
+        action = input(f'{self} action: ')
         bet = 0
         if action == 'raise':
-            bet = int(input(f'{self.name} bet: '))
+            bet = int(input(f'{self} bet: '))
         elif action == 'call':
             if self.game is not None:
                 bet = max(game.bets.values())

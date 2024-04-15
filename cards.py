@@ -40,7 +40,6 @@ class Game:
         # Players
         self.players = players
         self.hand_players = players.copy()
-        self.all_in_players = []
 
         self.dealer_pos = 0
         if len(self.players) > 2:
@@ -123,15 +122,11 @@ class Game:
             self.community_cards.append(self.deck.pop())
 
     def equal_bets(self):
-        # TODO: REWRITE
-        bets = set()
+        max_bet = max(self.bets.values())
         for player in self.hand_players:
-            if player not in self.all_in_players:
-                bets.add(self.bets[player])
-        if len(bets) == 1:
-            return True
-        else:
-            return False
+            if self.bets[player] < max_bet and player.chips > 0:
+                return False
+        return True
 
     def everyone_is_asked(self, asked):
         for player in self.hand_players:
@@ -155,9 +150,12 @@ class Game:
             i = (self.dealer_pos + 1) % len(self.hand_players)
 
         while not ((self.equal_bets() and self.everyone_is_asked(asked)) or (len(self.hand_players) <= 1)):
+            print([(player.name, game.bets[player]) for player in self.hand_players])
             # Player who is all in does nat make any actions more, but he still plays this hand
-            if self.hand_players[i] in self.all_in_players:
-                i = (i+1) % len(self.hand_players)
+            if self.hand_players[i].chips == 0:
+                # TODO: rewrite this
+                # we need to check as well whether next players have 0 chips left
+                i = (i + 1) % len(self.hand_players)
 
             act = self.hand_players[i].ask_action()
             asked.add(self.hand_players[i])
@@ -189,7 +187,7 @@ class Game:
                     max_bet = max(self.bets.values())
                     bet = max_bet - current_bet
 
-                    if self.hand_players[i].chips - bet > 0:
+                    if self.hand_players[i].chips - bet >= 0:
                         self.hand_players[i].bet(bet)
                         i = (i + 1) % len(self.hand_players)
                         break
@@ -198,23 +196,13 @@ class Game:
                         act = self.hand_players[i].ask_action()
 
                 elif act[0] == 'raise':
-                    if act[1] < self.hand_players[i].chips:
+                    if act[1] <= self.hand_players[i].chips:
                         self.hand_players[i].bet(act[1])
                         i = (i + 1) % len(self.hand_players)
                         break
                     else:
                         print('Impossible action!')
                         act = self.hand_players[i].ask_action()
-
-                elif act[0] == 'all_in':
-                    if self.hand_players[i].chips > 0:
-                        self.bets[self.hand_players[i]] += self.hand_players[i].chips
-                        self.hand_players[i].chips = 0
-                        self.all_in_players.append(self.hand_players[i])
-                        i = i % len(self.hand_players)
-                        break
-                    else:
-                        raise ValueError('Negative balance!')
 
         print('The bids are made the bidding is over.')
 
@@ -270,7 +258,6 @@ class Player:
                 self.game.bets[self] += self.chips
                 self.game.pot += self.chips
                 self.chips = 0
-                self.game.all_in_players.append(self)
         else:
             # Usual case
             self.chips -= amount

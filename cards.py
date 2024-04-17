@@ -38,7 +38,7 @@ class Player:
 
     def __str__(self):
         hole_cards_str = ', '.join(str(card) for card in self.hole_cards)
-        return f'{self.name} | {self.chips} | {hole_cards_str} | '
+        return f'{self.name} | chips: {self.chips} | {hole_cards_str} | '
 
     def ask_action(self):
         # Returns a tuple (action, bet)
@@ -86,7 +86,7 @@ class Game:
     # This class is implemented only for heads-up poker
     def __init__(self):
         # Parameters of the game
-        self.starting_chips = 500
+        self.starting_chips = 10000
         self.small_blind = 250
         self.increasing_blinds = False
         self.playing_style = None
@@ -102,7 +102,7 @@ class Game:
         self.user.game = self
         self.user.chips = self.starting_chips
 
-        # positions distribution
+        # Positions distribution
         self.players = [self.bot, self.user]
         random.shuffle(self.players)
         self.sb_pos = 0
@@ -156,14 +156,12 @@ class Game:
                         print(":::: Showdown:")
                         self.divide_pot()
                     else:
-                        # Case of fold
-                        pass
+                        self.post_fold_pot_division()
                 else:
-                    # Case of fold
-                    pass
+                    self.post_fold_pot_division()
             else:
-                # Case of fold
-                pass
+                self.post_fold_pot_division()
+
             self.swap_positions()
             self.clear()
             i += 1
@@ -191,60 +189,140 @@ class Game:
         self.sb_pos, self.bb_pos = self.bb_pos, self.sb_pos
 
     def bidding(self, preflop=False):
-        current_player_index = self.sb_pos if preflop else self.bb_pos
-        asked = 0
-        round_completed = False
+        """
+        :param preflop: determines game stage
+        :return: False if fold, True otherwise
+        """
+        if preflop:
+            i = self.sb_pos
+            player = self.players[i]  # SB at preflop
+            opponent = self.players[not i]  # BB at preflop
 
-        while not round_completed:
-            print(f'{[(player.name, player.bet) for player in self.players]}')
-            player = self.players[current_player_index]
-            opponent = self.players[not current_player_index]
-            action, bet = player.ask_action()
-            asked += 1
-            # print(asked)
+            # Cases if a player is all in because of blinds
+            if player.chips == 0:
+                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
+                print(f'{player.name} is already all-in')
+                return True
 
-            if action == 'fold':
-                round_completed = True
-                print(f'{player.name} has folded')
-                return False
-
-            elif action == 'check':
-                if player.bet != opponent.bet:
-                    print('Impossible action. Try again.')
-                    asked -= 1
-                    continue
+            elif opponent.chips == 0:
+                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
+                act, bet = player.ask_action()
+                if act == 'call':
+                    # Bet the full big blind
+                    player.make_bet(self.big_blind - player.bet)
+                    print(f'{opponent.name} is already all-in')
+                    return True
+                elif act == 'fold':
+                    print(f'{player.name} has folded')
+                    return False
                 else:
+                    raise ValueError('Invalid action')
+
+            # Usual bidding
+            asked = 0
+            while True:
+                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
+
+                act, bet = player.ask_action()
+                asked += 1
+
+                if act == 'fold':
+                    print(f'{player.name} has folded')
+                    return False
+
+                elif act == 'check':
+                    if player.bet != opponent.bet:
+                        raise ValueError('Invalid action')
+                    else:
+                        if asked >= 2:
+                            return True
+
+                elif act == 'call':
+                    if player.bet < opponent.bet:
+                        player.make_bet(opponent.bet - player.bet)
+                    else:
+                        raise ValueError('Invalid action')
                     if asked >= 2:
-                        round_completed = True
+                        return True
 
-            elif action == 'call':
-                if player.bet < opponent.bet:
-                    player.make_bet(opponent.bet - player.bet)
+                elif act == 'raise':
+                    if opponent.chips == 0:
+                        raise ValueError('Invalid action')
+
+                    if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
+                        # Usual case, bet is greater than minimum bet
+                        player.make_bet(bet)
+                    elif bet == player.chips and opponent.bet - player.bet < bet:
+                        # All in case, bet can be less than minimum bet
+                        player.make_bet(bet)
+                    else:
+                        raise ValueError('Invalid action')
+
                 else:
-                    print('Impossible action. Try again.')
-                    asked -= 1
-                    continue
+                    raise ValueError('Invalid action')
 
-                if asked >= 2:
-                    round_completed = True
+                # Ask next
+                i = not i
+                player = self.players[i]
+                opponent = self.players[not i]
 
-            elif action == 'raise':
-                if self.min_bet <= bet <= player.chips and opponent.bet - player.bet < bet:
-                    player.make_bet(bet)
+        else:
+            i = self.bb_pos
+            player = self.players[i]
+            opponent = self.players[not i]
+
+            # Case if a player is all in from the previous bidding
+            if player.chips == 0 or opponent.chips == 0:
+                print('There is a player already all in')
+                return True
+
+            # Usual bidding
+            asked = 0
+            while True:
+                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
+
+                act, bet = player.ask_action()
+                asked += 1
+
+                if act == 'fold':
+                    print(f'{player.name} has folded')
+                    return False
+
+                elif act == 'check':
+                    if player.bet != opponent.bet:
+                        raise ValueError('Invalid action')
+                    else:
+                        if asked >= 2:
+                            return True
+
+                elif act == 'call':
+                    if player.bet < opponent.bet:
+                        player.make_bet(opponent.bet - player.bet)
+                    else:
+                        raise ValueError('Invalid action')
+                    if asked >= 2:
+                        return True
+
+                elif act == 'raise':
+                    if opponent.chips == 0:
+                        raise ValueError('Invalid action')
+
+                    if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
+                        # Usual case, bet is greater than minimum bet
+                        player.make_bet(bet)
+                    elif bet == player.chips and opponent.bet - player.bet < bet:
+                        # All in case, bet can be less than minimum bet
+                        player.make_bet(bet)
+                    else:
+                        raise ValueError('Invalid action')
+
                 else:
-                    print('Impossible action. Try again.')
-                    asked -= 1
-                    continue
+                    raise ValueError('Invalid action')
 
-            else:
-                print('Impossible action. Try again.')
-                asked -= 1
-                continue
-
-            current_player_index = not current_player_index
-
-        print('The bids are made and the bidding is over.')
-        return True if self.user.chips and self.bot.chips else False
+                # Ask next
+                i = not i
+                player = self.players[i]
+                opponent = self.players[not i]
 
     def divide_pot(self):
         user_hand = self.evaluate_hand(self.user.hole_cards + self.community_cards)
@@ -261,11 +339,17 @@ class Game:
             self.bot.chips += self.pot
             print(f"{self.bot.name} wins the pot!")
         else:
+            # TODO: дописать деление банка для равных рук начиная со слабых
             self.user.chips += self.pot // 2
             self.bot.chips += self.pot // 2
             print("It's a draw! Pot is split evenly between players.")
 
         self.pot = 0
+
+    def post_fold_pot_division(self):
+        print('There was a fold!')
+        # TODO: дописать выигрыш пота одному игроку
+
 
     def evaluate_hand(self, cards):
         sorted_cards = sorted(cards, key=lambda card: card.rank, reverse=True)

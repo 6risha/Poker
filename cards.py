@@ -12,10 +12,8 @@ class Card:
     def __str__(self):
         suits_symbols = ['♣', '♦', '♥', '♠']
         ranks_symbols = {11: 'J', 12: 'Q', 13: 'K', 14: 'A'}
-
         rank_str = ranks_symbols.get(self.rank, str(self.rank))
         suit_str = suits_symbols[self.suit]
-
         return f"{rank_str}{suit_str}"
 
 
@@ -114,7 +112,7 @@ class Game:
         self.deck = Deck()
         random.shuffle(self.deck)
 
-        self.cards_for_current_hand = random.sample(self.deck, 8)
+        self.cards_for_current_hand = random.sample(self.deck, 9)
         self.community_cards = []
 
         # Bets
@@ -155,8 +153,17 @@ class Game:
                         print(f':::: River: {[str(card) for card in self.community_cards]}')
                         self.bidding()
 
-            print("THE HAND IS AT FINAL STAGE")
-            self.divide_pot()
+                        print(":::: Showdown:")
+                        self.divide_pot()
+                    else:
+                        # Case of fold
+                        pass
+                else:
+                    # Case of fold
+                    pass
+            else:
+                # Case of fold
+                pass
             self.swap_positions()
             i += 1
 
@@ -171,9 +178,6 @@ class Game:
 
     def swap_positions(self):
         self.sb_pos, self.bb_pos = self.bb_pos, self.sb_pos
-
-    def divide_pot(self):
-        pass
 
     def bidding(self, preflop=False):
         current_player_index = self.sb_pos if preflop else self.bb_pos
@@ -231,6 +235,143 @@ class Game:
 
         print('The bids are made and the bidding is over.')
         return True if self.user.chips and self.bot.chips else False
+
+    def divide_pot(self):
+        user_hand = self.evaluate_hand(self.user.hole_cards + self.community_cards)
+        combinations = {1: 'high card', 2: 'pair', 3: 'two pairs', 4: 'three of a kind', 5: 'straignt', 6: 'flush',
+                        7: 'full house', 8: 'four of a kind', 9: 'straight flush', 10: 'royal flush'}
+        print(f'{self.user.name} has {combinations[user_hand]}')
+        bot_hand = self.evaluate_hand(self.bot.hole_cards + self.community_cards)
+        print(f'{self.bot.name} has {combinations[bot_hand]}')
+
+        if user_hand > bot_hand:
+            self.user.chips += self.pot
+            print(f"{self.user.name} wins the pot!")
+        elif bot_hand > user_hand:
+            self.bot.chips += self.pot
+            print(f"{self.bot.name} wins the pot!")
+        else:
+            self.user.chips += self.pot // 2
+            self.bot.chips += self.pot // 2
+            print("It's a draw! Pot is split evenly between players.")
+
+        self.pot = 0
+
+    def evaluate_hand(self, cards):
+        sorted_cards = sorted(cards, key=lambda card: card.rank, reverse=True)
+
+        if self.is_royal_flush(sorted_cards):
+            return 10
+        elif self.is_straight_flush(sorted_cards):
+            return 9
+        elif self.is_four_of_a_kind(sorted_cards):
+            return 8
+        elif self.is_full_house(sorted_cards):
+            return 7
+        elif self.is_flush(sorted_cards):
+            return 6
+        elif self.is_straight(sorted_cards):
+            return 5
+        elif self.is_three_of_a_kind(sorted_cards):
+            return 4
+        elif self.is_two_pair(sorted_cards):
+            return 3
+        elif self.is_one_pair(sorted_cards):
+            return 2
+        else:
+            return 1
+
+    def is_royal_flush(self, cards):
+        if self.is_straight_flush(cards[:5]):
+            if cards[0].rank == 14:
+                return True
+        return False
+
+    def is_straight_flush(self, cards):
+        # The 'wheel' case: 5432A
+        cards2 = cards.copy()
+        if cards2[0].rank == 14:
+            cards2.append(cards2[0])
+            cards2[-1].rank = 1
+
+        count = 1
+        max_count = 1
+        for i in range(0, len(cards2)-1):
+            if cards2[i].rank - cards2[i + 1].rank == -1 and cards2[i].suit == cards2[i + 1].suit:
+                count += 1
+                max_count = max(max_count, count)
+            else:
+                count = 1
+        return max_count >= 5
+
+    def is_four_of_a_kind(self, cards):
+        for i in range(len(cards) - 3):
+            if cards[i].rank == cards[i + 1].rank == cards[i + 2].rank == cards[i + 3].rank:
+                return True
+        return False
+
+    def is_full_house(self, cards):
+        counts = {}
+        for card in cards:
+            rank = card.rank
+            if rank in counts:
+                counts[rank] += 1
+            else:
+                counts[rank] = 1
+
+        has_three_of_a_kind = False
+        has_pair = False
+
+        for count in counts.values():
+            if count == 3:
+                has_three_of_a_kind = True
+            elif count == 2:
+                has_pair = True
+
+        return has_three_of_a_kind and has_pair
+
+    def is_flush(self, cards):
+        counts = {suit: 0 for suit in range(4)}
+        for card in cards:
+            counts[card.suit] += 1
+        return max(counts.values()) >= 5
+
+
+    def is_straight(self, cards):
+        # The 'wheel' case: 5432A
+        cards2 = cards.copy()
+        if cards2[0].rank == 14:
+            cards2.append(cards2[0])
+            cards2[-1].rank = 1
+
+        count = 1
+        max_count = 1
+        for i in range(0, len(cards2) - 1):
+            if cards2[i].rank - cards2[i + 1].rank == -1:
+                count += 1
+                max_count = max(max_count, count)
+            else:
+                count = 1
+        return max_count >= 5
+
+    def is_three_of_a_kind(self, cards):
+        for i in range(len(cards) - 2):
+            if cards[i].rank == cards[i + 1].rank == cards[i + 2].rank:
+                return True
+        return False
+
+    def is_two_pair(self, cards):
+        pairs = 0
+        for i in range(len(cards) - 1):
+            if cards[i].rank == cards[i + 1].rank:
+                pairs += 1
+        return pairs == 2
+
+    def is_one_pair(self, cards):
+        for i in range(len(cards) - 1):
+            if cards[i].rank == cards[i + 1].rank:
+                return True
+        return False
 
 
 if __name__ == '__main__':

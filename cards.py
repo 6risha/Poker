@@ -151,10 +151,11 @@ class Game:
                         self.deal_community_cards(1)
                         print()
                         print(f':::: River: {[str(card) for card in self.community_cards]}')
-                        self.bidding()
-
-                        print(":::: Showdown:")
-                        self.divide_pot()
+                        if self.bidding():
+                            print(":::: Showdown:")
+                            self.divide_pot()
+                        else:
+                            self.post_fold_pot_division()
                     else:
                         self.post_fold_pot_division()
                 else:
@@ -198,7 +199,7 @@ class Game:
             player = self.players[i]  # SB at preflop
             opponent = self.players[not i]  # BB at preflop
 
-            # Cases if a player is all in because of blinds
+            # Cases if a player is all-in because of blinds
             if player.chips == 0:
                 print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
                 print(f'{player.name} is already all-in')
@@ -217,112 +218,63 @@ class Game:
                     return False
                 else:
                     raise ValueError('Invalid action')
-
-            # Usual bidding
-            asked = 0
-            while True:
-                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
-
-                act, bet = player.ask_action()
-                asked += 1
-
-                if act == 'fold':
-                    print(f'{player.name} has folded')
-                    return False
-
-                elif act == 'check':
-                    if player.bet != opponent.bet:
-                        raise ValueError('Invalid action')
-                    else:
-                        if asked >= 2:
-                            return True
-
-                elif act == 'call':
-                    if player.bet < opponent.bet:
-                        player.make_bet(opponent.bet - player.bet)
-                    else:
-                        raise ValueError('Invalid action')
-                    if asked >= 2:
-                        return True
-
-                elif act == 'raise':
-                    if opponent.chips == 0:
-                        raise ValueError('Invalid action')
-
-                    if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
-                        # Usual case, bet is greater than minimum bet
-                        player.make_bet(bet)
-                    elif bet == player.chips and opponent.bet - player.bet < bet:
-                        # All in case, bet can be less than minimum bet
-                        player.make_bet(bet)
-                    else:
-                        raise ValueError('Invalid action')
-
-                else:
-                    raise ValueError('Invalid action')
-
-                # Ask next
-                i = not i
-                player = self.players[i]
-                opponent = self.players[not i]
-
         else:
             i = self.bb_pos
             player = self.players[i]
             opponent = self.players[not i]
 
-            # Case if a player is all in from the previous bidding
+            # Case if a player is all-in from the previous bidding
             if player.chips == 0 or opponent.chips == 0:
                 print('There is a player already all in')
                 return True
 
-            # Usual bidding
-            asked = 0
-            while True:
-                print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
+        # Usual bidding
+        asked = 0
+        while True:
+            print(f':::: {self.user.name} bet: {self.user.bet} | {self.bot.name} bet: {self.bot.bet} | total: {self.pot}')
 
-                act, bet = player.ask_action()
-                asked += 1
+            act, bet = player.ask_action()
+            asked += 1
 
-                if act == 'fold':
-                    print(f'{player.name} has folded')
-                    return False
+            if act == 'fold':
+                print(f'{player.name} has folded')
+                return False
 
-                elif act == 'check':
-                    if player.bet != opponent.bet:
-                        raise ValueError('Invalid action')
-                    else:
-                        if asked >= 2:
-                            return True
-
-                elif act == 'call':
-                    if player.bet < opponent.bet:
-                        player.make_bet(opponent.bet - player.bet)
-                    else:
-                        raise ValueError('Invalid action')
+            elif act == 'check':
+                if player.bet != opponent.bet:
+                    raise ValueError('Invalid action')
+                else:
                     if asked >= 2:
                         return True
 
-                elif act == 'raise':
-                    if opponent.chips == 0:
-                        raise ValueError('Invalid action')
+            elif act == 'call':
+                if player.bet < opponent.bet:
+                    player.make_bet(opponent.bet - player.bet)
+                else:
+                    raise ValueError('Invalid action')
+                if asked >= 2:
+                    return True
 
-                    if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
-                        # Usual case, bet is greater than minimum bet
-                        player.make_bet(bet)
-                    elif bet == player.chips and opponent.bet - player.bet < bet:
-                        # All in case, bet can be less than minimum bet
-                        player.make_bet(bet)
-                    else:
-                        raise ValueError('Invalid action')
+            elif act == 'raise':
+                if opponent.chips == 0:
+                    raise ValueError('Invalid action')
 
+                if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
+                    # Usual case, bet is greater than minimum bet
+                    player.make_bet(bet)
+                elif bet == player.chips and opponent.bet - player.bet < bet:
+                    # All in case, bet can be less than minimum bet
+                    player.make_bet(bet)
                 else:
                     raise ValueError('Invalid action')
 
-                # Ask next
-                i = not i
-                player = self.players[i]
-                opponent = self.players[not i]
+            else:
+                raise ValueError('Invalid action')
+
+            # Ask next
+            i = not i
+            player = self.players[i]
+            opponent = self.players[not i]
 
     def divide_pot(self):
         user_hand = self.evaluate_hand(self.user.hole_cards + self.community_cards)
@@ -429,7 +381,6 @@ class Game:
         for card in cards:
             counts[card.suit] += 1
         return max(counts.values()) >= 5
-
 
     def is_straight(self, cards):
         # The 'wheel' case: 5432A

@@ -35,6 +35,7 @@ class Player:
         self.chips = 0
         self.bet = 0
         self.hole_cards = []
+        self.fold = False
 
     def __str__(self):
         hole_cards_str = ', '.join(str(card) for card in self.hole_cards)
@@ -91,16 +92,16 @@ class Game:
         self.increasing_blinds = False
         self.playing_style = None
 
+        # User
+        self.user = User()
+        self.user.game = self
+        self.user.chips = self.starting_chips
+
         # Bot
         self.bot = Bot()
         self.bot.game = self
         self.bot.chips = self.starting_chips
         self.bot.style = self.playing_style
-
-        # User
-        self.user = User()
-        self.user.game = self
-        self.user.chips = self.starting_chips
 
         # Positions distribution
         self.players = [self.bot, self.user]
@@ -135,7 +136,7 @@ class Game:
             print(f':::: BB: {self.players[self.bb_pos].name}')
 
             self.deal_hole_cards()
-            print(f':::: Dealing hole cards: {self.bot.name} - {[str(card) for card in self.bot.hole_cards]}, {self.user.name} - {[str(card) for card in self.user.hole_cards]}')
+            print(f':::: Dealing hole cards: {self.user.name} - {[str(card) for card in self.user.hole_cards]}, {self.bot.name} - {[str(card) for card in self.bot.hole_cards]}')
             print()
             print(f':::: Preflop')
 
@@ -163,6 +164,8 @@ class Game:
             else:
                 self.post_fold_pot_division()
 
+            print(f':::: End of the hand: {self.user.name} - {self.user.chips} chips | {self.bot.name} - {self.bot.chips} chips')
+            print()
             self.swap_positions()
             self.clear()
             i += 1
@@ -170,12 +173,15 @@ class Game:
     def clear(self):
         self.community_cards = []
         self.cards_for_current_hand = random.sample(self.deck, 9)
+        self.pot = 0
 
         self.user.bet = 0
         self.user.hole_cards = []
+        self.user.fold = False
 
         self.bot.bet = 0
         self.bot.hole_cards = []
+        self.bot.fold = False
 
     def deal_hole_cards(self):
         for i in range(2):
@@ -214,6 +220,7 @@ class Game:
                     print(f'{opponent.name} is already all-in')
                     return True
                 elif act == 'fold':
+                    player.fold = True
                     print(f'{player.name} has folded')
                     return False
                 else:
@@ -237,6 +244,7 @@ class Game:
             asked += 1
 
             if act == 'fold':
+                player.fold = True
                 print(f'{player.name} has folded')
                 return False
 
@@ -296,12 +304,13 @@ class Game:
             self.bot.chips += self.pot // 2
             print("It's a draw! Pot is split evenly between players.")
 
-        self.pot = 0
-
     def post_fold_pot_division(self):
-        print('There was a fold!')
-        # TODO: дописать выигрыш пота одному игроку
-
+        if self.user.fold:
+            self.bot.chips += self.pot
+            print(f'Pot goes to {self.bot.name}')
+        else:
+            self.user.chips += self.pot
+            print(f'Pot goes to {self.user.name}')
 
     def evaluate_hand(self, cards):
         sorted_cards = sorted(cards, key=lambda card: card.rank, reverse=True)

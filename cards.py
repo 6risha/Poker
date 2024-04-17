@@ -86,7 +86,7 @@ class Game:
     # This class is implemented only for heads-up poker
     def __init__(self):
         # Parameters of the game
-        self.starting_chips = 10000
+        self.starting_chips = 500
         self.small_blind = 250
         self.increasing_blinds = False
         self.playing_style = None
@@ -165,7 +165,18 @@ class Game:
                 # Case of fold
                 pass
             self.swap_positions()
+            self.clear()
             i += 1
+
+    def clear(self):
+        self.community_cards = []
+        self.cards_for_current_hand = random.sample(self.deck, 9)
+
+        self.user.bet = 0
+        self.user.hole_cards = []
+
+        self.bot.bet = 0
+        self.bot.hole_cards = []
 
     def deal_hole_cards(self):
         for i in range(2):
@@ -181,7 +192,6 @@ class Game:
 
     def bidding(self, preflop=False):
         current_player_index = self.sb_pos if preflop else self.bb_pos
-
         asked = 0
         round_completed = False
 

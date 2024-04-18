@@ -1,4 +1,5 @@
 import random
+import copy
 
 
 class Card:
@@ -122,6 +123,8 @@ class Game:
         self.user.bet = 0
         self.bot.bet = 0
         self.pot = 0
+        # TODO: переписать вывод победителя
+        self.winner = None
 
     def play(self):
         i = 1
@@ -285,21 +288,134 @@ class Game:
             opponent = self.players[not i]
 
     def divide_pot(self):
-        user_hand = self.evaluate_hand(self.user.hole_cards + self.community_cards)
+        winner = None
+
         combinations = {1: 'high card', 2: 'pair', 3: 'two pairs', 4: 'three of a kind', 5: 'straignt', 6: 'flush',
                         7: 'full house', 8: 'four of a kind', 9: 'straight flush', 10: 'royal flush'}
-        print(f'{self.user.name} has {combinations[user_hand]}')
-        bot_hand = self.evaluate_hand(self.bot.hole_cards + self.community_cards)
-        print(f'{self.bot.name} has {combinations[bot_hand]}')
 
-        if user_hand > bot_hand:
-            self.user.chips += self.pot
-            print(f"{self.user.name} wins the pot!")
-        elif bot_hand > user_hand:
-            self.bot.chips += self.pot
-            print(f"{self.bot.name} wins the pot!")
+        user_hand = sorted(self.user.hole_cards + self.community_cards, key=lambda x: x.rank)
+        user_combo = self.evaluate_hand(user_hand)
+        print(f'{self.user.name} has {combinations[user_combo[0]]}')
+
+        bot_hand = sorted(self.bot.hole_cards + self.community_cards, key=lambda x: x.rank)
+        bot_combo = self.evaluate_hand(bot_hand)
+        print(f'{self.bot.name} has {combinations[bot_combo[0]]}')
+
+        if user_combo[0] > bot_combo[0]:
+            winner = self.user
+        elif bot_combo[0] > user_combo[0]:
+            winner = self.bot
         else:
-            # TODO: дописать деление банка для равных рук начиная со слабых
+            # Equal combinations
+            if user_combo[0] == 1:
+                # High card
+                user_cards = sorted(self.user.hole_cards, key=lambda x: x.rank, reverse=True)
+                bot_cards = sorted(self.bot.hole_cards, key=lambda x: x.rank, reverse=True)
+
+                winner = self.compare_kicker(user_cards, bot_cards)
+
+            elif user_combo[0] == 2 or user_combo[0] == 4 or user_combo[0] == 8:
+                # Pair or three of kind or four of kind
+                if user_combo[1] > bot_combo[1]:
+                    winner = self.user
+                elif user_combo[1] < bot_combo[1]:
+                    winner = self.bot
+                else:
+                    user_cards = []
+                    for card in sorted(self.user.hole_cards, key=lambda x: x.rank, reverse=True):
+                        if card.rank != user_combo[1]:
+                            user_cards.append(card)
+
+                    bot_cards = []
+                    for card in sorted(self.bot.hole_cards, key=lambda x: x.rank, reverse=True):
+                        if card.rank != bot_combo[1]:
+                            bot_cards.append(card)
+
+                    winner = self.compare_kicker(user_cards, bot_cards)
+
+            elif user_combo[0] == 3 or user_combo == 7:
+                # Two pairs or full house
+                if user_combo[1][0] > bot_combo[1][0]:
+                    winner = self.user
+                elif user_combo[1][0] < bot_combo[1][0]:
+                    winner = self.bot
+                else:
+                    if user_combo[1][1] > bot_combo[1][1]:
+                        winner = self.user
+                    elif user_combo[1][1] < bot_combo[1][1]:
+                        winner = self.bot
+                    else:
+                        user_cards = []
+                        for card in sorted(self.user.hole_cards, key=lambda x: x.rank, reverse=True):
+                            if card.rank not in user_combo[1]:
+                                user_cards.append(card)
+
+                        bot_cards = []
+                        for card in sorted(self.bot.hole_cards, key=lambda x: x.rank, reverse=True):
+                            if card.rank not in bot_combo[1]:
+                                bot_cards.append(card)
+
+                        winner = self.compare_kicker(user_cards, bot_cards)
+
+            elif user_combo[0] == 5 or user_combo == 9:
+                # Straight or straight flush
+                if user_combo[1] > bot_combo[1]:
+                    winner = self.user
+                elif user_combo[1] < bot_combo[1]:
+                    winner = self.bot
+                else:
+                    user_cards = copy.deepcopy(user_hand)
+                    for i in range(5):
+                        for elem in user_cards:
+                            if elem.rank == user_combo[1]-i:
+                                user_cards.remove(elem)
+                                break
+
+                    bot_cards = copy.deepcopy(bot_hand)
+                    for i in range(5):
+                        for elem in bot_cards:
+                            if elem.rank == bot_combo[1]-i:
+                                bot_cards.remove(elem)
+
+                    winner = self.compare_kicker(user_cards, bot_cards)
+
+            elif user_combo[0] == 6:
+                # Flush
+                for i in range(5):
+                    if user_combo[1][i] > bot_combo[1][i]:
+                        winner = self.user
+                        break
+                    if bot_combo[1][i] > user_combo[1][i]:
+                        winner = self.bot
+                        break
+
+                if winner is None:
+                    user_cards = copy.deepcopy(user_hand)
+                    for rank in user_combo[1]:
+                        for card in user_cards:
+                            if card.rank == rank and card.suit == user_combo[2]:
+                                user_cards.remove(card)
+                                break
+
+                    bot_cards = copy.deepcopy(bot_hand)
+                    for rank in bot_combo[1]:
+                        for card in bot_cards:
+                            if card.rank == rank and card.suit == bot_combo[2]:
+                                bot_cards.remove(card)
+                                break
+
+                    winner = self.compare_kicker(user_cards, bot_cards)
+
+            elif user_combo[0] == 10:
+                # Royal flush
+                user_cards = user_hand[:2]
+                bot_cards = bot_hand[:2]
+                winner = self.compare_kicker(user_cards, bot_cards)
+
+        if winner is not None:
+            winner.chips += self.pot
+            print(f'{winner.name} wins the pot!')
+        else:
             self.user.chips += self.pot // 2
             self.bot.chips += self.pot // 2
             print("It's a draw! Pot is split evenly between players.")
@@ -312,60 +428,67 @@ class Game:
             self.user.chips += self.pot
             print(f'Pot goes to {self.user.name}')
 
-    def evaluate_hand(self, cards):
-        sorted_cards = sorted(cards, key=lambda card: card.rank, reverse=True)
+    def evaluate_hand(self, sorted_cards):
+        # Cards are sorted by ascending rank
+        combo = self.royal_flush(sorted_cards)
+        if combo is None:
+            combo = self.straight_flush(sorted_cards)
+            if combo is None:
+                combo = self.four_of_kind(sorted_cards)
+                if combo is None:
+                    combo = self.full_house(sorted_cards)
+                    if combo is None:
+                        combo = self.flush(sorted_cards)
+                        if combo is None:
+                            combo = self.straight(sorted_cards)
+                            if combo is None:
+                                combo = self.three_of_kind(sorted_cards)
+                                if combo is None:
+                                    combo = self.pair_or_two(sorted_cards)
+                                    if combo is None:
+                                        # High card
+                                        combo = (1, 0)
+        return combo
 
-        if self.is_royal_flush(sorted_cards):
-            return 10
-        elif self.is_straight_flush(sorted_cards):
-            return 9
-        elif self.is_four_of_a_kind(sorted_cards):
-            return 8
-        elif self.is_full_house(sorted_cards):
-            return 7
-        elif self.is_flush(sorted_cards):
-            return 6
-        elif self.is_straight(sorted_cards):
-            return 5
-        elif self.is_three_of_a_kind(sorted_cards):
-            return 4
-        elif self.is_two_pair(sorted_cards):
-            return 3
-        elif self.is_one_pair(sorted_cards):
-            return 2
-        else:
-            return 1
+    def royal_flush(self, cards):
+        # Cards are sorted by ascending rank
+        if self.straight_flush(cards[2:]):
+            if cards[-1].rank == 14:
+                return 10, 0
+        return None
 
-    def is_royal_flush(self, cards):
-        if self.is_straight_flush(cards[:5]):
-            if cards[0].rank == 14:
-                return True
-        return False
-
-    def is_straight_flush(self, cards):
-        # The 'wheel' case: 5432A
-        cards2 = cards.copy()
-        if cards2[0].rank == 14:
-            cards2.append(cards2[0])
-            cards2[-1].rank = 1
+    def straight_flush(self, cards):
+        # Cards are sorted by ascending rank
+        # The 'wheel' case: A2345
+        cards2 = copy.deepcopy(cards)
+        if cards2[-1].rank == 14:
+            cards2.insert(0, cards2[-1])
+            cards2[0].rank = 1
 
         count = 1
         max_count = 1
+        max_card = None
         for i in range(0, len(cards2)-1):
             if cards2[i].rank - cards2[i + 1].rank == -1 and cards2[i].suit == cards2[i + 1].suit:
                 count += 1
                 max_count = max(max_count, count)
+                max_card = cards2[i+1]
             else:
                 count = 1
-        return max_count >= 5
+        if max_count >= 5:
+            return 9, max_card.rank
+        else:
+            return None
 
-    def is_four_of_a_kind(self, cards):
+    def four_of_kind(self, cards):
+        # Cards are sorted by ascending rank
         for i in range(len(cards) - 3):
             if cards[i].rank == cards[i + 1].rank == cards[i + 2].rank == cards[i + 3].rank:
-                return True
-        return False
+                return 8, cards[i].rank
+        return None
 
-    def is_full_house(self, cards):
+    def full_house(self, cards):
+        # Cards are sorted by ascending rank
         counts = {}
         for card in cards:
             rank = card.rank
@@ -374,58 +497,89 @@ class Game:
             else:
                 counts[rank] = 1
 
-        has_three_of_a_kind = False
-        has_pair = False
+        counts = sorted(counts.items(), key=lambda x: (x[1], x[0]), reverse=True)
 
-        for count in counts.values():
-            if count == 3:
-                has_three_of_a_kind = True
-            elif count == 2:
-                has_pair = True
+        if counts[0][1] >= 3 and counts[1][1] >= 2:
+            return 7, [counts[0][0], counts[1][0]]
 
-        return has_three_of_a_kind and has_pair
+        return None
 
-    def is_flush(self, cards):
-        counts = {suit: 0 for suit in range(4)}
+    def flush(self, cards):
+        # Cards are sorted by ascending rank
+        counts = {suit: [] for suit in range(4)}
         for card in cards:
-            counts[card.suit] += 1
-        return max(counts.values()) >= 5
+            counts[card.suit].append(card.rank)
 
-    def is_straight(self, cards):
-        # The 'wheel' case: 5432A
-        cards2 = cards.copy()
-        if cards2[0].rank == 14:
-            cards2.append(cards2[0])
-            cards2[-1].rank = 1
+        max_count = max(len(suit_cards) for suit_cards in counts.values())
+        if max_count >= 5:
+            flush_suit = max(counts, key=lambda x: len(counts[x]))
+            flush_ranks = sorted(counts[flush_suit], reverse=True)
+            # Ranks are sorted by descending order
+            return 6, flush_ranks, flush_suit
+        else:
+            return None
+
+    def straight(self, cards):
+        # Cards are sorted by ascending rank
+        # The 'wheel' case: A2345
+        cards2 = copy.deepcopy(cards)
+        if cards2[-1].rank == 14:
+            cards2.insert(0, cards2[-1])
+            cards2[0].rank = 1
 
         count = 1
         max_count = 1
+        max_card = None
         for i in range(0, len(cards2) - 1):
             if cards2[i].rank - cards2[i + 1].rank == -1:
                 count += 1
                 max_count = max(max_count, count)
+                max_card = cards2[i + 1]
             else:
                 count = 1
-        return max_count >= 5
+        if max_count >= 5:
+            return 5, max_card.rank
+        else:
+            return None
 
-    def is_three_of_a_kind(self, cards):
+    def three_of_kind(self, cards):
+        # Cards are sorted by ascending rank
         for i in range(len(cards) - 2):
             if cards[i].rank == cards[i + 1].rank == cards[i + 2].rank:
-                return True
-        return False
+                return 4, cards[i].rank
+        return None
 
-    def is_two_pair(self, cards):
-        pairs = 0
+    def pair_or_two(self, cards):
+        # Cards are sorted by ascending rank
+        pairs = []
         for i in range(len(cards) - 1):
             if cards[i].rank == cards[i + 1].rank:
-                pairs += 1
-        return pairs == 2
+                # In the result pairs are sorted by descending rank
+                pairs.insert(0, cards[i].rank)
+        if len(pairs) >= 2:
+            return 3, pairs
+        elif len(pairs) == 1:
+            return 2, pairs[0]
+        else:
+            return None
 
-    def is_one_pair(self, cards):
-        for i in range(len(cards) - 1):
-            if cards[i].rank == cards[i + 1].rank:
-                return True
-        return False
+    def compare_kicker(self, user_cards, bot_cards):
+        # Cards are sorted by descending rank
+        winner = None
+
+        if user_cards and bot_cards:
+            if user_cards[0].rank > bot_cards[0].rank:
+                winner = self.user
+            elif user_cards[0].rank < bot_cards[0].rank:
+                winner = self.bot
+            else:
+                if len(user_cards) > 1 and len(bot_cards) > 1:
+                    if user_cards[1].rank > bot_cards[1].rank:
+                        winner = self.user
+                    elif user_cards[1].rank < bot_cards[1].rank:
+                        winner = self.bot
+
+        return winner
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-class Analise:
+class Analysis:
 
     def __init__(self, df, df2):
         super().__init__()
@@ -80,7 +80,7 @@ class Analise:
         players = self.players_list()
         hands = self.count_hands()
         for i in range(hands):
-            x.append(i+1)
+            x.append(i + 1)
         for k in range(len(players)):
             data = self.player_data(players[k])
             for j in range(len(data)):
@@ -119,7 +119,7 @@ class Analise:
         players = self.player_list2()
         hands = self.count_hands2()
         for i in range(hands):
-            x.append(i+1)
+            x.append(i + 1)
         for k in range(len(players)):
             data = self.player_data_2(players[k][1])
             for j in range(len(data)):
@@ -152,11 +152,12 @@ class Analise:
         plt.legend()
         plt.show()
 
+
 class Store_data:
     def __init__(self):
         super().__init__()
         self.df3 = pd.DataFrame()
 
 
-game = Analise('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
-Analise.plot_multiple2(game)
+game = Analysis('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
+Analysis.plot_multiple2(game)

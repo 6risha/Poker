@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-# import numpy as np
 
 
 class Analise:
@@ -97,21 +96,17 @@ class Analise:
                     y5.append(data[j][1])
                 elif k == 5:
                     y6.append(data[j][1])
-        plt.plot(x, y1)
-        plt.plot(x, y2)
-        plt.plot(x, y3)
-        plt.plot(x, y4)
-        plt.plot(x, y5)
-        plt.plot(x, y6)
+        if len(y2) == len(x):
+            plt.plot(x, y2, label=players[1][0])
+        if len(y3) == len(x):
+            plt.plot(x, y3, label=players[2][0])
+        if len(y4) == len(x):
+            plt.plot(x, y4, label=players[3][0])
+        if len(y5) == len(x):
+            plt.plot(x, y5, label=players[4][0])
+        if len(y6) == len(x):
+            plt.plot(x, y6, label=players[5][0])
         plt.show()
-        print(x)
-        print(y1)
-        print(y2)
-        print(y3)
-        print(y4)
-        print(y5)
-        print(y6)
-        print()
 
     def plot_multiple2(self):
         x = [0]
@@ -141,25 +136,27 @@ class Analise:
                 elif k == 5:
                     y6.append(data[j][1])
         plt.plot(x, y1, label=players[0][0])
-        plt.plot(x, y2, label=players[1][0])
-        plt.plot(x, y3, label=players[2][0])
-        plt.plot(x, y4, label=players[3][0])
-        plt.plot(x, y5, label=players[4][0])
-        plt.plot(x, y6, label=players[5][0])
-        plt.title(f'Chip count for {players[0][0]}, {players[1][0]}, {players[2][0]}, {players[3][0]}, {players[4][0]} and {players[5][0]}')
+        if len(y2) == len(x):
+            plt.plot(x, y2, label=players[1][0])
+        if len(y3) == len(x):
+            plt.plot(x, y3, label=players[2][0])
+        if len(y4) == len(x):
+            plt.plot(x, y4, label=players[3][0])
+        if len(y5) == len(x):
+            plt.plot(x, y5, label=players[4][0])
+        if len(y6) == len(x):
+            plt.plot(x, y6, label=players[5][0])
+        plt.title(f'Chip count for all players')
         plt.xlabel('Hand')
         plt.ylabel('Chip count')
         plt.legend()
         plt.show()
-        print(x)
-        print(y1)
-        print(y2)
-        print(y3)
-        print(y4)
-        print(y5)
-        print(y6)
+
+class Store_data:
+    def __init__(self):
+        super().__init__()
+        self.df3 = pd.DataFrame()
 
 
 game = Analise('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
-# Analise.plot_multiple(game)
 Analise.plot_multiple2(game)

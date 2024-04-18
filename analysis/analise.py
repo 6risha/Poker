@@ -5,9 +5,11 @@ import pandas as pd
 
 class Analise:
 
-    def __init__(self, df):
+    def __init__(self, df, df2):
         super().__init__()
         self.df = pd.read_csv(df, delimiter='\t')
+        self.df2 = pd.read_csv(df2, delimiter='\t', skiprows=[0, 1])
+        self.df3 = pd.read_csv(df2, delimiter='\t', nrows=2)
         self.start_chips = 10000
         self.player_list = []
         self.color_list = ['red', 'blue', 'green', 'yellow', 'black', 'white']
@@ -19,6 +21,13 @@ class Analise:
                 count = (row['Hand#'])
         return count
 
+    def count_hands2(self):
+        count = 0
+        for index, row in self.df2.iterrows():
+            if row['Hand#'] > count:
+                count = (row['Hand#'])
+        return count
+
     def player_data(self, player):
         lst = []
         for i in range(len(self.df)):
@@ -26,11 +35,27 @@ class Analise:
                 lst.append([self.df.iloc[i, 0], self.df.iloc[i, 2]])
         return lst
 
+    def player_data_2(self, player):
+        lst = []
+        for index, row in self.df2.iterrows():
+            for j in range(len(self.df2.columns)):
+                hand = [self.df2.iloc[index, 0], self.df2.iloc[index, j]]
+                if (hand not in lst) and (player == self.df2.columns[j]):
+                    lst.append(hand)
+        return lst
+
     def players_list(self):
         for index, row in self.df.iterrows():
             if row['Player'] not in self.player_list:
                 self.player_list.append(row['Player'])
         return self.player_list
+
+    def player_list2(self):
+        lst = []
+        for i in range(1, len(self.df3.columns)):
+            if self.df3.iloc[1, i] not in self.player_list:
+                lst.append([self.df3.iloc[0, i], self.df3.iloc[1, i]])
+        return lst
 
     def plot_graph(self, player):
         x = []
@@ -57,32 +82,84 @@ class Analise:
         hands = self.count_hands()
         for i in range(hands):
             x.append(i+1)
-        for player in players:
-            data = self.player_data(player)
-            i = players.index(player)
-            if i == 1:
-                for j in range(len(data)):
+        for k in range(len(players)):
+            data = self.player_data(players[k])
+            for j in range(len(data)):
+                if k == 0:
                     y1.append(data[j][1])
-            if i == 2:
-                for j in range(len(data)):
+                elif k == 1:
                     y2.append(data[j][1])
-            if i == 3:
-                for j in range(len(data)):
+                elif k == 2:
                     y3.append(data[j][1])
-            if i == 4:
-                for j in range(len(data)):
+                elif k == 3:
                     y4.append(data[j][1])
-            if i == 5:
-                for j in range(len(data)):
+                elif k == 4:
                     y5.append(data[j][1])
-            if i == 6:
-                for j in range(len(data)):
+                elif k == 5:
                     y6.append(data[j][1])
         plt.plot(x, y1)
+        plt.plot(x, y2)
+        plt.plot(x, y3)
+        plt.plot(x, y4)
+        plt.plot(x, y5)
+        plt.plot(x, y6)
         plt.show()
+        print(x)
         print(y1)
         print(y2)
+        print(y3)
+        print(y4)
+        print(y5)
+        print(y6)
+        print()
+
+    def plot_multiple2(self):
+        x = [0]
+        y1 = [self.start_chips]
+        y2 = [self.start_chips]
+        y3 = [self.start_chips]
+        y4 = [self.start_chips]
+        y5 = [self.start_chips]
+        y6 = [self.start_chips]
+        players = self.player_list2()
+        hands = self.count_hands2()
+        for i in range(hands):
+            x.append(i+1)
+        for k in range(len(players)):
+            data = self.player_data_2(players[k][1])
+            for j in range(len(data)):
+                if k == 0:
+                    y1.append(data[j][1])
+                elif k == 1:
+                    y2.append(data[j][1])
+                elif k == 2:
+                    y3.append(data[j][1])
+                elif k == 3:
+                    y4.append(data[j][1])
+                elif k == 4:
+                    y5.append(data[j][1])
+                elif k == 5:
+                    y6.append(data[j][1])
+        plt.plot(x, y1, label=players[0][0])
+        plt.plot(x, y2, label=players[1][0])
+        plt.plot(x, y3, label=players[2][0])
+        plt.plot(x, y4, label=players[3][0])
+        plt.plot(x, y5, label=players[4][0])
+        plt.plot(x, y6, label=players[5][0])
+        plt.title(f'Chip count for {players[0][0]}, {players[1][0]}, {players[2][0]}, {players[3][0]}, {players[4][0]} and {players[5][0]}')
+        plt.xlabel('Hand')
+        plt.ylabel('Chip count')
+        plt.legend()
+        plt.show()
+        print(x)
+        print(y1)
+        print(y2)
+        print(y3)
+        print(y4)
+        print(y5)
+        print(y6)
 
 
-game = Analise('history/poker_analisis_test.txt')
-Analise.plot_multiple(game)
+game = Analise('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
+# Analise.plot_multiple(game)
+Analise.plot_multiple2(game)

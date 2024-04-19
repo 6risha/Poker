@@ -1,4 +1,7 @@
 import tkinter as tk
+from PIL import Image, ImageTk
+from cards import *
+from tests import create_hand
 
 
 class StartFrame(tk.Frame):
@@ -119,6 +122,29 @@ class SettingsFrame(tk.Frame):
 class GameFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+
+        self.game = Game()
+        self.game.community_cards = create_hand(['3♠', '7♦', '9♠', '10♣', 'Q♠'])
+
+        self.community_cards_frame = CommunityCardsFrame(self)
+        self.community_cards_frame.pack(fill=tk.BOTH, expand=True, pady=100, padx=200)
+
+
+class CommunityCardsFrame(tk.Frame):
+    def __init__(self, frame):
+        super().__init__(frame)
+
+        self.table_color = 'forestgreen'
+        self.configure(bg=self.table_color)
+
+        self.images = []
+        self.labels = []
+
+        for card in frame.game.community_cards:
+            self.images.append(tk.PhotoImage(card.front_face))
+            label = tk.Label(self, image=self.images[-1])
+            label.pack(side=tk.LEFT, padx=20)
+            self.labels.append(label)
 
 
 class TutorialsFrame(tk.Frame):

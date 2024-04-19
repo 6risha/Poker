@@ -129,3 +129,4 @@ class TutorialsFrame(tk.Frame):
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+

@@ -46,7 +46,7 @@ class Node:
         return avgStrategy
 
     def display(self):
-        average_strategy = np.around(self.getAverageStrategy(), 2)
+        average_strategy = np.around(self.getAverageStrategy(), 4)
         print(f"{self.infoSet.ljust(3)} -> {average_strategy}")
 
 
@@ -61,10 +61,15 @@ def cfr(cards, history, p0, p1):
 
         # Terminal pass
         if history[-1] == 'p':
-            if history == "pp":
+            if history == 'pp':
                 return 1 if isPlayersCardHigher else -1
-            else:  # Two cases no? "bp", and "pbp". But that is taken into account during the cfr function call
-                return 1
+            else:
+                if history == 'bp':
+                    return 1
+                # TODO: понять почему все-таки тут 1 возвращается
+                elif history == 'pbp':
+                    return 1
+
         # Double bet
         elif history[-2:] == 'bb':
             return 2 if isPlayersCardHigher else -2
@@ -105,19 +110,18 @@ def train(iterations):
     for i in tqdm(range(iterations), desc="Training Loop"):
         shuffle(cards)
         util += cfr(cards, "", 1, 1)
-        if i and (i % 100000 == 0):
+        if i and (i % 100_000 == 0):
             print(" Average game value: ", util / (i+1))
-
-    print("\nTraining complete.")
+    print("Training complete.")
 
 
 if __name__ == "__main__":
-    train_from_scratch = True
+    train_from_scratch = False
     if train_from_scratch:
-        train(1000000)
-        joblib.dump(TreeMap, "KuhnNodeMap.joblib")
+        train(1_000_000)
+        joblib.dump(TreeMap, "KuhnTreeMap.joblib")
     else:
-        TreeMap = joblib.load("KuhnNodeMap.joblib")
+        TreeMap = joblib.load("KuhnTreeMap.joblib")
 
     print("Total Number of Infosets:", len(TreeMap))
     for infoSet in TreeMap:

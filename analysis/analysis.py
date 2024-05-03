@@ -159,40 +159,44 @@ class StoreData:
     def __init__(self, chip_start):
         super().__init__()
         self.chip_start = chip_start
-        self.data = [['ChipStart', 'Player1', 'Player2', 'Player3', 'Player4', 'Player5', 'Player6'],
-                     [],
-                     ['Hand#', 'Player1', 'Player2', 'Player3', 'Player4', 'Player5', 'Player6']]
-        self.data2 = {'ChipStart': [self.chip_start, {'Hand#': []}],
-                      'Player1': ['', {'Player1': []}],
-                      'Player2': ['', {'Player2': []}],
-                      'Player3': ['', {'Player3': []}],
-                      'Player4': ['', {'Player4': []}],
-                      'Player5': ['', {'Player5': []}],
-                      'Player6': ['', {'Player6': []}]}
+        self.player1 = ''
+        self.player2 = ''
+        self.player3 = ''
+        self.player4 = ''
+        self.player5 = ''
+        self.player6 = ''
+        self.data = {'ChipStart': [self.chip_start, 'Hand#'],
+                      'Player1': ['', 'Player1'],
+                      'Player2': ['', 'Player2'],
+                      'Player3': ['', 'Player3'],
+                      'Player4': ['', 'Player4'],
+                      'Player5': ['', 'Player5'],
+                      'Player6': ['', 'Player6']}
         print(self.data)
-        print(self.data2)
         self.df = pd.DataFrame()
-        self.final = {}
 
     def get_header_data(self):
+
         pass
 
     def get_hand_data(self):
+        for k, v in self.data.items():
+            if k == 'ChipStart':
+                v.append(len(v) - 1)
+            if self.data[k][0] == '':
+                v.append(0)
+        print(self.data)
         pass
-
-    def final_df(self):
-        for k, v in self.data2.items():
-            lst = []
-            self.final[k] = [v[0]]
-
-
 
     def write_to_file(self):
+        print(self.data['ChipStart'][0])
         self.df = pd.DataFrame(self.data)
-        self.df.to_csv('history/test_write.txt', index=False, sep='\t', index_label=False)
-        self.df2.to_csv('history/test_write2.txt', index=False, sep='\t', index_label=False)
-        pass
+        self.df.to_csv('history/test_write3.txt', index=False, sep='\t')
 
 
 game = StoreData(10000)
-StoreData.final_df(game)
+StoreData.get_hand_data(game)
+StoreData.write_to_file(game)
+
+game2 = Analise('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
+Analise.plot_multiple2(game2)

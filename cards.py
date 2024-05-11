@@ -306,7 +306,7 @@ class Game:
     def determine_winner(self):
         winner = None
 
-        combinations = {1: 'high card', 2: 'pair', 3: 'two pairs', 4: 'three of a kind', 5: 'straignt', 6: 'flush',
+        combinations = {1: 'high card', 2: 'pair', 3: 'two pairs', 4: 'three of a kind', 5: 'straight', 6: 'flush',
                         7: 'full house', 8: 'four of a kind', 9: 'straight flush', 10: 'royal flush'}
 
         user_hand = sorted(self.user.hole_cards + self.community_cards, key=lambda x: x.rank)

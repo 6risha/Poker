@@ -185,6 +185,16 @@ class TutorialsFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
 
+    
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def exit(self, event):
+        self.pack_forget()
+        self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):

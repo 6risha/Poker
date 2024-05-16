@@ -82,6 +82,24 @@ class User(Player):
     def __init__(self):
         super().__init__()
         self.name = 'Thomas'
+        self.action = None
+        self.action_bet = None
+
+    # def ask_action(self):
+    #     while 1:
+    #         if self.action is not None:
+    #             break
+    #
+    #     # Returns a tuple (action, bet)
+    #     if self.action == 'call':
+    #         if self.game is not None:
+    #             self.action_bet = max(self.game.user.bet, self.game.bot.bet)
+    #
+    #     act, bet = self.action, self.action_bet
+    #     self.action, self.action_bet = None, None
+    #
+    #     return act, bet
+
 
 
 class Game:

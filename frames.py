@@ -54,6 +54,7 @@ class StartFrame(tk.Frame):
         self.pack_forget()
         if menu == 'Game':
             self.window.game_frame.pack(fill=tk.BOTH, expand=True)
+            # self.window.game_frame.game.play()
         elif menu == 'Tutorials':
             self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
         elif menu == 'Analysis':
@@ -72,17 +73,17 @@ class SettingsFrame(tk.Frame):
         self.small_font = ('Courier New', 24, 'bold')
 
         # Set blinds sizes
-        self.blind_size = tk.DoubleVar()
+        self.blind_size = tk.IntVar()
         self.min_blind_size = 250
         self.max_blind_size = 1000
         self.scale1 = tk.Scale(self, orient='horizontal', from_=self.min_blind_size, to=self.max_blind_size, tickinterval=250, length=400, label='Small blind size', variable=self.blind_size, resolution=250, font=self.small_font)
         self.scale1.pack(pady=30, padx=10)
 
         # Set starting chips amount
-        self.starting_chips = tk.DoubleVar()
+        self.starting_chips = tk.IntVar()
         self.min_chips = 5000
         self.max_chips = 15000
-        self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips + 2000, tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips, resolution=5000, font=self.small_font)
+        self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips, tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips, resolution=5000, font=self.small_font)
         self.scale2.pack(pady=30, padx=10)
 
         # Blind increase
@@ -112,8 +113,15 @@ class SettingsFrame(tk.Frame):
 class GameFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+        self.window = window
 
         self.game = Game()
+        # TODO: the parameters changed in setting do not show up in the game frame
+        self.game.small_blind = self.window.settings_frame.blind_size.get()
+        self.game.starting_chips = self.window.settings_frame.starting_chips.get()
+        self.game.increasing_blinds = self.window.settings_frame.blind_increase.get()
+        self.game.playing_style = None
+
         self.game.community_cards = create_hand(['3♠', '7♦', '9♠', '10♣', 'Q♠'])
         self.game.user.hole_cards = create_hand(['9♦', '8♠'])
 
@@ -142,8 +150,8 @@ class GameFrame(tk.Frame):
                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.red_card_color, background=self.bg_card_color)
             else:
                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
-            label.pack(side=tk.LEFT, padx=10)
-        self.community_cards_frame.pack(side=tk.TOP)
+            label.pack(side=tk.LEFT, padx=10, pady=20)
+        self.community_cards_frame.pack(side=tk.TOP, pady=80, padx=100)
 
         # User Frame
         self.user_frame = tk.Frame(self)
@@ -158,34 +166,58 @@ class GameFrame(tk.Frame):
                 label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
             label.pack(side=tk.LEFT, padx=10)
 
-        self.button_fame = tk.Frame(self.user_frame)
-        self.fold_button = tk.Button(self.button_fame, text="Fold", font=self.small_font)
-        self.check_button = tk.Button(self.button_fame, text="Check", font=self.small_font)
-        self.call_button = tk.Button(self.button_fame, text="Call", font=self.small_font)
-        self.raise_button = tk.Button(self.button_fame, text="Raise", font=self.small_font)
+        self.button_frame = tk.Frame(self.user_frame)
+        self.fold_button = tk.Button(self.button_frame, text="Fold", font=self.small_font)
+        self.fold_button.bind('<Button-1>', self.fold_action)
+        self.check_button = tk.Button(self.button_frame, text="Check", font=self.small_font)
+        self.check_button.bind('<Button-1>', self.check_action)
+        self.call_button = tk.Button(self.button_frame, text="Call", font=self.small_font)
+        self.raise_button = tk.Button(self.button_frame, text="Raise", font=self.small_font)
 
         self.fold_button.pack(side=tk.LEFT, padx=10)
         self.check_button.pack(side=tk.LEFT, padx=10)
         self.call_button.pack(side=tk.LEFT, padx=10)
         self.raise_button.pack(side=tk.LEFT, padx=10)
 
-        self.raise_slider = tk.Scale(self.user_frame, from_=0, to=self.game.user.chips, orient=tk.HORIZONTAL, font=self.small_font)
+        self.bet_value = tk.IntVar()
+        self.raise_slider = tk.Scale(self.user_frame,orient='horizontal', from_=0, to=self.game.user.chips, tickinterval=2000, resolution=self.game.small_blind, length=600, font=self.small_font, variable=self.bet_value)
 
         self.user_hole_cards_frame.pack(side=tk.TOP)
         self.user_chips_label.pack(side=tk.TOP)
         self.user_role_label.pack(side=tk.TOP)
-        self.button_fame.pack(side=tk.TOP)
+        self.button_frame.pack(side=tk.TOP)
         self.raise_slider.pack(side=tk.TOP)
 
-        self.user_frame.pack(side=tk.TOP, fill=tk.X)
+        self.user_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=30)
 
+        # self.game.play()
+
+    def fold_action(self, event):
+        self.game.user.action = 'fold'
+        self.game.user.bet = 0
+        return
+
+    def check_action(self, event):
+        self.game.user.action = 'check'
+        self.game.user.action_bet = 0
+        return
+
+    def call_action(self, event):
+        self.game.user.action = 'call'
+        self.game.user.action_bet = 0
+        return
+
+    def raise_action(self, event):
+        self.game.user.action = 'call'
+        self.game.user.action_bet = self.bet_value.get()
+        return
 
 
 class TutorialsFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
 
-    
+
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
@@ -195,6 +227,7 @@ class TutorialsFrame(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
+
 
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):

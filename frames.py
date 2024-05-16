@@ -216,8 +216,41 @@ class GameFrame(tk.Frame):
 class TutorialsFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+        
+        self.window = window
+        self.configure(bg=self.window.bg_color)
 
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
 
+        self.main_label = tk.Label(self.window, text="Tutorials", bg='gray18', fg='white', font=("Arial", 20))
+        self.main_label.pack(pady=20)
+
+        self.button_frame = tk.Frame(self.window, bg='gray18')
+        self.button_frame.pack()
+        
+        
+
+        self.button_texts = ["1", "2", "3", "4"]
+        for text in self.button_texts:
+            self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+            self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
+            self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
+            self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
+            self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
+            
+            
+    def open_next(self, menu, event):
+        self.pack_forget()
+        if menu == '1':
+            self.window.Tutorial_1.pack(fill=tk.BOTH, expand=True)
+        elif menu == '2':
+            self.window.Tutorial_2.pack(fill=tk.BOTH, expand=True)
+        elif menu == '3':
+            self.window.Tutorial_3.pack(fill=tk.BOTH, expand=True)
+        elif menu == '4':
+            self.window.Tutorial_4.pack(fill=tk.BOTH, expand=True)
+        
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
@@ -227,6 +260,42 @@ class TutorialsFrame(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
+
+class Tutorial1(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
+
+class Tutorial2(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
+
+class Tutorial3(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
+
+class Tutorial4(tk.Frame):
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
 
 
 class AnalysisFrame(tk.Frame):

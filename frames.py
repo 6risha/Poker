@@ -223,13 +223,18 @@ class TutorialsFrame(tk.Frame):
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
 
-        self.main_label = tk.Label(self.window, text="Tutorials", bg='gray18', fg='white', font=("Arial", 20))
-        self.main_label.pack(pady=20)
+        #self.main_label = tk.Label(self.window, text="Tutorials", bg='gray18', fg='white', font=("Arial", 20))
+        #self.main_label.pack(pady=20)
 
         self.button_frame = tk.Frame(self.window, bg='gray18')
         self.button_frame.pack()
         
-        
+        # Exit button
+        self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.leave_tuto.pack()
+        self.leave_tuto.bind('<Enter>', lambda event, lbl=self.leave_tuto: self.on_enter(lbl, event))
+        self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
+        self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
 
         self.button_texts = ["1", "2", "3", "4"]
         for text in self.button_texts:

@@ -77,6 +77,49 @@ class Bot(Player):
         self.name = 'Grisha'
         self.style = None
 
+    def ask_action(self):
+        fold = ('fold', 0)
+        check = ('check', 0)
+        call = ('call', self.game.user.bet - self.bet)
+        raise_1bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind)
+        raise_2bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind * 2)
+        raise_4bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind * 4)
+        all_in = ('raise', self.chips)
+
+        actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
+
+        while True:
+            action = random.choice(actions)
+            try:
+                self.validate_action(action)
+                print(f'{self}: {action}')
+                return action
+            except ValueError:
+                continue
+
+    def validate_action(self, action):
+        act, bet = action
+        opponent = self.game.user
+
+        if act == 'fold':
+            return
+        elif act == 'check':
+            if self.bet != opponent.bet:
+                raise ValueError('Invalid action')
+        elif act == 'call':
+            if self.bet >= opponent.bet:
+                raise ValueError('Invalid action')
+        elif act == 'raise':
+            if opponent.chips == 0:
+                raise ValueError('Invalid action')
+            if bet < self.game.min_bet and bet != self.chips:
+                raise ValueError('Invalid action')
+            if bet <= opponent.bet:
+                raise ValueError('Invalid action')
+        else:
+            raise ValueError('Invalid action')
+
+
 
 class User(Player):
     def __init__(self):

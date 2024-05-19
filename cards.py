@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import copy
 
 
@@ -75,21 +76,45 @@ class Bot(Player):
     def __init__(self):
         super().__init__()
         self.name = 'Grisha'
-        self.style = None
+
+        # Possible styles:
+        # LP - loose passive (plays every hand, calls every bet)
+        # TP - tight passive (plays only strongest hands, calls every bet)
+        # LAG - loose aggressive (plays every hand, raises actively)
+        # TAG - tight aggressive (plays only strongest hands, raises actively)
+        self.style = 'Calculated Strategy'
+
+
+        self.history = ''
+        self.info_set = ''
+        self.tree_map = self.get_strategies()
+
+    def get_strategies(self):
+        pass
+
+    def update_info_set(self):
+        pass
 
     def ask_action(self):
-        fold = ('fold', 0)
-        check = ('check', 0)
-        call = ('call', self.game.user.bet - self.bet)
-        raise_1bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind)
-        raise_2bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind * 2)
-        raise_4bb = ('raise', max(self.bet, self.game.user.bet) + self.game.big_blind * 4)
+        fold = ('fold', 0, 'p')
+        check = ('check', 0, 'p')
+        call = ('call', self.game.user.bet - self.bet, 'c')
+        raise_1bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind, 'b')
+        raise_2bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 2, 'b')
+        raise_4bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 4, 'b')
         all_in = ('raise', self.chips)
 
         actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
+        probabilities = [0.2, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05]
+        #actions = [fold, check, call, raise_1bb]
 
         while True:
-            action = random.choice(actions)
+            # Returns a list of 1 element, so we need an index at the end
+            action = random.choices(actions, weights=probabilities)[0]
+
+            # Remove unnecessary folds
+            if action[0] == 'fold' and self.bet == self.game.user.bet:
+                action = check
             try:
                 self.validate_action(action)
                 print(f'{self}: {action}')
@@ -103,22 +128,26 @@ class Bot(Player):
 
         if act == 'fold':
             return
-        elif act == 'check':
+
+        if act == 'check':
             if self.bet != opponent.bet:
                 raise ValueError('Invalid action')
-        elif act == 'call':
+            return
+
+        if act == 'call':
             if self.bet >= opponent.bet:
                 raise ValueError('Invalid action')
-        elif act == 'raise':
+            return
+
+        if act == 'raise':
             if opponent.chips == 0:
                 raise ValueError('Invalid action')
-            if bet < self.game.min_bet and bet != self.chips:
+            if not ((self.game.min_bet <= bet < self.chips and opponent.bet - self.bet < bet) or
+                    (bet == self.chips and opponent.bet - self.bet < bet)):
                 raise ValueError('Invalid action')
-            if bet <= opponent.bet:
-                raise ValueError('Invalid action')
-        else:
-            raise ValueError('Invalid action')
+            return
 
+        raise ValueError('Invalid action')
 
 
 class User(Player):

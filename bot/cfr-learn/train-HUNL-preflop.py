@@ -14,13 +14,13 @@ game = Game()
 global player
 players = [game.bot, game.user]
 
-FOLD = ('fold', 0)
-CHECK = ('check', 0)
-CALL = ('call', 0)  # 0 is changed in the game to the right bet
-RAISE_1BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind)
-RAISE_2BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind * 2)
-RAISE_4BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind * 4)
-ALL_IN = ('raise', game.user.chips if player == game.user else game.bot.chips)
+FOLD = ('fold', 0, 'p')
+CHECK = ('check', 0, 'p')
+CALL = ('call', 0, 'c')  # 0 is changed in the game to the right bet
+RAISE_1BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind, 'b')
+RAISE_2BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind * 2, 'b')
+RAISE_4BB = ('raise', max(game.bot.bet, game.user.bet) + game.big_blind * 4, 'b')
+ALL_IN = ('raise', game.user.chips if player == game.user else game.bot.chips, 'b')
 
 ACTIONS = [FOLD, CHECK, CALL, RAISE_1BB, RAISE_2BB, RAISE_4BB, ALL_IN]
 NUM_ACTIONS = 7
@@ -52,24 +52,42 @@ def cfr(cards, history, p0, p1):
     player = players[len(history) % 2]
     opponent = players[1 - player]
 
+    # Determine whether the node is terminal
     if len(history) > 1:
         # TODO: determine winners
-        if history[-1] == 'p' and history[-2] != 'c':  # bet, fold
+        if history[-2:] == 'bp':  # raise (all-in), fold
             pass
         elif history[-2:] == 'cp':  # call, check
             pass
-        elif history[-2:] == 'bc':  # bet, call
+        elif history[-2:] == 'bc':  # raise (all-in), call
             pass
-        elif history[-2:] == 'bb' and opponent.chips == 0:  # bet, all-in
+        elif history[-2:] == 'bb' and opponent.chips == 0:  # raise, all-in
+            pass
+    elif len(history) == 1:
+        if history[0] == 'p':  # fold
             pass
 
-        infoSet = ''.join(str(card) for card in player.hole_cards + history)
-        if infoSet not in TreeMap:
-            node = Node()
-            node.infoSet = infoSet
-            TreeMap[infoSet] = node
-        else:
-            node = TreeMap[infoSet]
+    infoSet = ''.join(str(card) for card in player.hole_cards + history)
+    if infoSet not in TreeMap:
+        node = Node()
+        node.infoSet = infoSet
+        TreeMap[infoSet] = node
+    else:
+        node = TreeMap[infoSet]
+
+    strategy = node.getStrategy(p0 if player == players[0] else p1)
+    util = np.zeros(NUM_ACTIONS)
+    nodeUtil = 0
+
+    for act in ACTIONS:
+        if act[0] == 'fold':
+            pass
+        elif act[0] == 'check':
+            pass
+        elif act[0] == 'call':
+            pass
+        elif act[0] == 'raise':
+            pass
 
 
 # Train the model

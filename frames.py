@@ -2,6 +2,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from cards import *
 from tests import create_hand
+from analysis.analysis import Analise
+import os
 
 
 class StartFrame(tk.Frame):
@@ -266,6 +268,7 @@ class TutorialsFrame(tk.Frame):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
+
 class Tutorial1(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
@@ -274,6 +277,7 @@ class Tutorial1(tk.Frame):
 
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
+
 
 class Tutorial2(tk.Frame):
     def __init__(self, window):
@@ -284,6 +288,7 @@ class Tutorial2(tk.Frame):
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
 
+
 class Tutorial3(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
@@ -292,6 +297,7 @@ class Tutorial3(tk.Frame):
 
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
+
 
 class Tutorial4(tk.Frame):
     def __init__(self, window):
@@ -306,3 +312,42 @@ class Tutorial4(tk.Frame):
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
+
+        self.img = tk.PhotoImage(file='images/analyste-daffaires.png')
+        self.img = self.img.subsample(2)
+
+        self.button = []
+        for file in os.listdir('analysis/history'):
+            self.button.append(tk.Label(self, text=file, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color))
+        for i in range(len(self.button)):
+            self.button[i].pack(side=tk.TOP)
+            self.button[i].bind('<Enter>', lambda event, lbl=self.button[i]: self.on_enter(lbl, event))
+            self.button[i].bind('<Leave>', lambda event, lbl=self.button[i]: self.on_leave(lbl, event))
+            self.button[i].bind('<Button-1>', lambda event: self.open_graph(self.button[i], event))
+
+        self.button2 = tk.Label(self, text='<<', font= self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.button2.pack(side=tk.BOTTOM)
+        self.button2.bind('<Enter>', lambda event, lbl=self.button2: self.on_enter(lbl, event))
+        self.button2.bind('<Leave>', lambda event, lbl=self.button2: self.on_leave(lbl, event))
+        self.button2.bind('<Button-1>', lambda event: self.back_to_menu(event))
+
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def back_to_menu(self, event):
+        self.pack_forget()
+        self.window.start_frame.pack(fill=tk.BOTH, expand=True)
+
+    def open_graph(self, label, event):
+        for file in os.listdir('analysis/history'):
+            hst = Analise(f'analysis/history/{file}')
+            if label == file:
+                Analise.plot_multiple2(hst)

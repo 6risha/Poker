@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from frames import SettingsFrame
+
 
 
 class Analise:
 
-    def __init__(self, df, df2):
+    def __init__(self, df2):
         super().__init__()
-        self.df = pd.read_csv(df, delimiter='\t')
+        self.df = pd.read_csv(df2, delimiter='\t')
         self.df2 = pd.read_csv(df2, delimiter='\t', skiprows=[0, 1])
         self.df3 = pd.read_csv(df2, delimiter='\t', nrows=2)
         self.start_chips = 10000
@@ -193,10 +193,3 @@ class StoreData:
         self.df = pd.DataFrame(self.data)
         self.df.to_csv('history/test_write3.txt', index=False, sep='\t')
 
-
-game = StoreData(10000)
-StoreData.get_hand_data(game)
-StoreData.write_to_file(game)
-
-game2 = Analise('history/poker_analysis_test.txt', 'history/poker_analysis_test_2.txt')
-Analise.plot_multiple2(game2)

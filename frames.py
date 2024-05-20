@@ -345,11 +345,75 @@ class Tutorial1(tk.Frame):
 class Tutorial2(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+
         self.window = window
         self.configure(bg=self.window.bg_color)
 
         self.big_font = ('Courier New', 40, 'bold')
-        self.small_font = ('Courier New', 24, 'bold')
+        self.text_font = ('Courier New', 12, 'bold')
+
+        # Exit button
+        self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
+                                   fg=self.window.fg_color)
+        self.leave_tuto.pack()
+        self.leave_tuto.bind('<Enter>', lambda event, lbl=self.leave_tuto: self.on_enter(lbl, event))
+        self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
+        self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
+
+        self.main_label = tk.Label(self, text="2: Understanding Strategy and Probability", bg='gray18', fg='white',
+                                   font=self.big_font)
+        self.main_label.pack(pady=20)
+
+        self.button_frame = tk.Frame(self.window, bg='gray18')
+        self.button_frame.pack()
+
+    #########################################
+
+        self.text_2 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
+                          font=self.text_font)
+        self.text_2.pack(expand=True, fill='both', padx=20, pady=20)
+
+        self.text_2.tag_configure("big", font=("Lato", 20))
+        self.text_2.tag_configure("small", font=("Lato", 10))
+        self.text_2.tag_configure("bold", font=("Lato", 13, "bold"))
+        self.text_2.tag_configure("italic", font=("Lato", 13, "italic"))
+
+        self.subtitle1 = "Basic strategy\n\n"
+        self.text_2.insert(tk.END, self.subtitle1, "big")
+
+    # Insert some initial text without explicit newlines
+        self.long_text_2 = (
+        "A player needs to develop a sense for the power of the hand they are dealt. This will enable them to male the good decisions, know when to fold, when to bet, and when to limp.\n\n"
+        "Limping is when a player tries to go the furthest in a hand without wagering a lot of chips, as they are unsure of their hand. This also means they will know what sized raises they should call with their hands, and where the limit is, in terms of chips, between calling and folding.\n\n"
+        "Pocket pairs, meaning being dreamt pairs are considered as strong, as whatever the flop, turn and river may be, they already have a pair at worst. This can also easily lead to 3 of a kind or even a set.\n\n"
+        "Apart from that, suited hands, meaning both cards are of the same colour, are appreciated, as this opens up the possibility of a flush.\n\n"
+        "Moreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
+        "Of course, a straight can still be had, but only with one card as the two are too far apart to be on the same straight, meaning that 4 cards are dealt on the table in a straight configuration, making it easy for other players to also have a straight.\n\n"
+        "Between all these cases there are a lot of other ordinary hands, but in general, the higher the values of the cards the better. \n\n"
+        )
+        self.text_2.insert(tk.END, self.long_text_2)
+
+        self.subtitle1 = "Probability and odds\n\n"
+        self.text_2.insert(tk.END, self.subtitle1, "big")
+
+        self.long_text_2_1 = (
+        "In pre-flo, each hand has a certain probability of winning, classified in the poker hand power chart. In this chart, all the possible hands are represented.\n\n"
+        "The “o” means off-suit, “s” means suited, meaning that they are the same colour or oppositely two different colours.\n"
+        "The number associated to the hand is the percentage of hands that are stronger.\n"
+        "So, for a pair ofaces, this number is 0, as 0% of hands are stronger.\n\n"
+        )
+        self.text_2.insert(tk.END, self.long_text_2_1)
+
+
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def exit(self, event):
+        self.pack_forget()
+        self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
 
 
 class Tutorial3(tk.Frame):

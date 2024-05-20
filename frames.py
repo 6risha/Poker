@@ -272,12 +272,75 @@ class TutorialsFrame(tk.Frame):
 class Tutorial1(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+
         self.window = window
         self.configure(bg=self.window.bg_color)
 
-        self.big_font = ('Courier New', 40, 'bold')
-        self.small_font = ('Courier New', 24, 'bold')
+        self.big_font = ('Lato', 40, 'bold')
+        self.text_font = ('Lato', 12, 'bold')
 
+        # Exit button
+        self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
+                                   fg=self.window.fg_color)
+        self.leave_tuto.pack()
+        self.leave_tuto.bind('<Enter>', lambda event, lbl=self.leave_tuto: self.on_enter(lbl, event))
+        self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
+        self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
+
+        self.main_label = tk.Label(self, text="1: Introduction to poker basics", bg='gray18', fg='white', font=self.big_font)
+        self.main_label.pack(pady=20)
+
+        self.button_frame = tk.Frame(self.window, bg='gray18')
+        self.button_frame.pack()
+        
+        #########################################
+
+        self.text_1 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
+                                   font=self.text_font)
+        self.text_1.pack(expand=True, fill='both', padx=20, pady=20)
+
+        self.text_1.tag_configure("big", font=("Lato", 20))
+        self.text_1.tag_configure("small", font=("Lato", 10))
+        self.text_1.tag_configure("bold", font=("Lato", 13, "bold"))
+        self.text_1.tag_configure("italic", font=("Lato", 13, "italic"))
+
+        self.subtitle1 = "Rules and objectives\n\n"
+        self.text_1.insert(tk.END, self.subtitle1, "big")
+
+        # Insert some initial text without explicit newlines
+        self.long_text_1 = (
+            "The game of poker is played in multiple different versions. This game, and thus this tutorial will focus on Texas Hold’em poker. It is played with a standard 52-card deck. The goal of the game is to multiply one’s money, represented on the table by chips. "
+            "The game is over when only one player has chips at the table. A player is eliminated when they have no chips left. \n\n"
+            "In Texas Hold’em, the game is played hand by hand. Each player will be dealt 2 cards, and, by the end of the hand there will be 5 cards present on the table. The player who can make the strongest 5-card combination out of the 2 in their hand and the 5 on the table wins the totality of the bets on the table, called the pot. \n\n"
+            "To determine which player has the strongest combination, the rankings are as follows, from weakest to strongest : high card, one pair, two pairs, 3 of a kind, straight, flush, full house, 4 of a kind, straight-flush, royal flush.\n\n"
+            "A high card means that out of the most favourable 5 card combination for each player, no player has any notable hand. In this case the player with the highest card wins. If players have the same high card, they split the pot between them. \n\n"
+            "A pair means that a player has 2 cards of a kind, for example 2 queens. If multiple players have pairs, the highest pair wins. For the same pairs, the highest remaining card determines the winner. \n\n"
+            "3 of a kind works like pairs, but intuitively with 3 cards of a kind, for example 3 queens. No 2 players can have the same strength as 3 of a kind, as there are no 4 cards of one kind in the deck.\n\n"
+            "A straight means that a player can make a combination of 5 cards that follow each other, creating a straight. One example is 7, 8, 9, 10, J. In the case where multiple players have a straight, the higher straight takes the pot. \n\n"
+            "If they have an identical straight, as no cards of the 5 remain without being taken into account, they split the pot. In the case of straights, the ace can be considered as the highest card in the deck, coming after the king, as the lowest preceding the deuce. In any other application the ace is considered the highest card of a colour, coming after the king. \n\n"
+            "A flush is when a player makes a 5 card combination which have all the same colour. To split two players having flushes, the highest card of each flush is to be taken into account. In the case where these are identical, they split the pot. \n\n"
+            "4 of a kind works like 3 of a kind. It is also sometimes called a set. A straight-flush is self explanatory, it is a straight from the same colour. Here also, if 2 players have this combination the higher straight wins. \n\n"
+            "The royal flush is the best combination in poker, it is unbeatable. It is a straight-flush, at the very top of the deck, so 10, J, Q, K, A of the same colour. No 2 players can have a royal flush in the same hand. \n\n"
+        )
+        self.text_1.insert(tk.END, self.long_text_1)
+
+        self.subtitle1 = "Gameplay and betting structure\n\n"
+        self.text_1.insert(tk.END, self.subtitle1, "big")
+
+        self.long_text_1_1 = (
+            "..."
+             )
+        self.text_1.insert(tk.END, self.long_text_1_1)
+
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def exit(self, event):
+        self.pack_forget()
+        self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
 
 class Tutorial2(tk.Frame):
     def __init__(self, window):

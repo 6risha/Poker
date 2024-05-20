@@ -214,7 +214,6 @@ class GameFrame(tk.Frame):
         self.game.user.action_bet = self.bet_value.get()
         return
 
-
 class TutorialsFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
@@ -225,37 +224,64 @@ class TutorialsFrame(tk.Frame):
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
 
-        #self.main_label = tk.Label(self.window, text="Tutorials", bg='gray18', fg='white', font=("Arial", 20))
-        #self.main_label.pack(pady=20)
+        self.main_label = tk.Label(self, text="Tutorials", bg='gray18', fg='white', font=self.big_font)
+        self.main_label.pack(pady=20)
 
         self.button_frame = tk.Frame(self.window, bg='gray18')
         self.button_frame.pack()
-        
-        # Exit button
-        self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+
+        self.button_texts = ["1: Introduction to poker basics", "2: Understanding Strategy and Probability", "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
+        #for text in self.button_texts:
+         #   self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+          #  self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
+            #self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
+           # self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
+            #self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
+        self.label_tuto1 = tk.Label(self, text="1: Introduction to poker basics", font=self.small_font, bg=self.window.bg_color,
+                                   fg=self.window.fg_color)
+        self.label_tuto1.pack(side=tk.TOP, pady=(100, 0))
+        self.label_tuto1.bind('<Enter>', lambda event, lbl=self.label_tuto1: self.on_enter(lbl, event))
+        self.label_tuto1.bind('<Leave>', lambda event, lbl=self.label_tuto1: self.on_leave(lbl, event))
+        self.label_tuto1.bind('<Button-1>', lambda event: self.open_next("1: Introduction to poker basics", event))
+
+        self.label_tuto2 = tk.Label(self, text="2: Understanding Strategy and Probability", font=self.small_font, bg=self.window.bg_color,
+                                    fg=self.window.fg_color)
+        self.label_tuto2.pack(side=tk.TOP, pady=(100, 0))
+        self.label_tuto2.bind('<Enter>', lambda event, lbl=self.label_tuto2: self.on_enter(lbl, event))
+        self.label_tuto2.bind('<Leave>', lambda event, lbl=self.label_tuto2: self.on_leave(lbl, event))
+        self.label_tuto2.bind('<Button-1>', lambda event: self.open_next("2: Understanding Strategy and Probability", event))
+
+        self.label_tuto3 = tk.Label(self, text="3: Advanced Concepts and Techniques", font=self.small_font, bg=self.window.bg_color,
+                                    fg=self.window.fg_color)
+        self.label_tuto3.pack(side=tk.TOP, pady=(100, 0))
+        self.label_tuto3.bind('<Enter>', lambda event, lbl=self.label_tuto3: self.on_enter(lbl, event))
+        self.label_tuto3.bind('<Leave>', lambda event, lbl=self.label_tuto3: self.on_leave(lbl, event))
+        self.label_tuto3.bind('<Button-1>', lambda event: self.open_next("3: Advanced Concepts and Techniques", event))
+
+        self.label_tuto4 = tk.Label(self, text="4: Practice and Improvement", font=self.small_font, bg=self.window.bg_color,
+                                    fg=self.window.fg_color)
+        self.label_tuto4.pack(side=tk.TOP, pady=(100, 0))
+        self.label_tuto4.bind('<Enter>', lambda event, lbl=self.label_tuto4: self.on_enter(lbl, event))
+        self.label_tuto4.bind('<Leave>', lambda event, lbl=self.label_tuto4: self.on_leave(lbl, event))
+        self.label_tuto4.bind('<Button-1>', lambda event: self.open_next("4: Practice and Improvement", event))
+
+         # Exit button
+        self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
+                                      fg=self.window.fg_color)
         self.leave_tuto.pack()
         self.leave_tuto.bind('<Enter>', lambda event, lbl=self.leave_tuto: self.on_enter(lbl, event))
         self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
         self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
 
-        self.button_texts = ["1", "2", "3", "4"]
-        for text in self.button_texts:
-            self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
-            self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
-            self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
-            self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
-            self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
-            
-            
     def open_next(self, menu, event):
         self.pack_forget()
-        if menu == '1':
+        if menu == '1: Introduction to poker basics':
             self.window.Tutorial_1.pack(fill=tk.BOTH, expand=True)
-        elif menu == '2':
+        elif menu == '2: Understanding Strategy and Probability':
             self.window.Tutorial_2.pack(fill=tk.BOTH, expand=True)
-        elif menu == '3':
+        elif menu == '3: Advanced Concepts and Techniques':
             self.window.Tutorial_3.pack(fill=tk.BOTH, expand=True)
-        elif menu == '4':
+        elif menu == '4: Practice and Improvement':
             self.window.Tutorial_4.pack(fill=tk.BOTH, expand=True)
         
     def on_enter(self, label, event):
@@ -267,7 +293,6 @@ class TutorialsFrame(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
-
 
 class Tutorial1(tk.Frame):
     def __init__(self, window):

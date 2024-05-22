@@ -1,5 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+#from holoviews.examples.gallery.apps.bokeh.gapminder import button
+
 from cards import *
 from tests import create_hand
 from analysis.analysis import Analise
@@ -323,12 +325,14 @@ class AnalysisFrame(tk.Frame):
 
         self.button = []
         for file in os.listdir('analysis/history'):
-            self.button.append(tk.Label(self, text=file, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color))
+            if '.txt' in file:
+                self.button.append([tk.Label(self, text=file, font=self.big_font, bg=self.window.bg_color,
+                                             fg=self.window.fg_color), 'analysis/history/' + f'{file}'])
         for i in range(len(self.button)):
-            self.button[i].pack(side=tk.TOP)
-            self.button[i].bind('<Enter>', lambda event, lbl=self.button[i]: self.on_enter(lbl, event))
-            self.button[i].bind('<Leave>', lambda event, lbl=self.button[i]: self.on_leave(lbl, event))
-            self.button[i].bind('<Button-1>', lambda event: self.open_graph(self.button[i], event))
+            self.button[i][0].pack(side=tk.TOP)
+            self.button[i][0].bind('<Enter>', lambda event, lbl=self.button[i][0]: self.on_enter(lbl, event))
+            self.button[i][0].bind('<Leave>', lambda event, lbl=self.button[i][0]: self.on_leave(lbl, event))
+            self.assign_button(self.button[i][0], self.button[i][1])
 
         self.button2 = tk.Label(self, text='<<', font= self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.button2.pack(side=tk.BOTTOM)
@@ -346,8 +350,12 @@ class AnalysisFrame(tk.Frame):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
-    def open_graph(self, label, event):
-        for file in os.listdir('analysis/history'):
-            hst = Analise(f'analysis/history/{file}')
-            if label == file:
-                Analise.plot_multiple2(hst)
+    def assign_button(self, button, file):
+        button.bind('<Button-1>', lambda event: self.open_graph(file, event))
+
+    def open_graph(self, file, event):
+        new_graph = Analise(file)
+        name = new_graph.plot_multiple2()
+
+        img = Image.open(name)
+        img.show()

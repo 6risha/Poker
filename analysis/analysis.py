@@ -80,7 +80,7 @@ class Analise:
         plt.ylabel('Chip count')
         plt.legend()
         self.plot_name = self.name.replace('txt', 'png')
-        plt.savefig(self.plot_name)
+        plt.savefig(self.plot_name, dpi= 1000)
         print(f'Graph of {self.plot_name} done')
         return self.plot_name
 
@@ -123,5 +123,4 @@ class StoreData:
         print(self.data['ChipStart'][0])
         self.df = pd.DataFrame(self.data)
         self.df.to_csv('history/test_write3.txt', index=False, sep='\t')
-
 

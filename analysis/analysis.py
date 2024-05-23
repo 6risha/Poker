@@ -4,6 +4,9 @@ import pandas as pd
 
 class Analise:
     def __init__(self, df2):
+        '''
+        :param df2: File in string format to be used for analysis
+        '''
         super().__init__()
         self.name = df2
         self.plot_name = ''
@@ -15,6 +18,9 @@ class Analise:
         self.color_list = ['red', 'blue', 'green', 'yellow', 'black', 'white']
 
     def count_hands2(self):
+        '''
+        :return: Number of hands in the dataframe in as an integer
+        '''
         count = 0
         for index, row in self.df2.iterrows():
             if row['Hand#'] > count:
@@ -22,6 +28,10 @@ class Analise:
         return count
 
     def player_data_2(self, player):
+        '''
+        :param player: Name of player
+        :return: List with the chip-count of a given player, hand by hand, from the dataframe
+        '''
         lst = []
         for index, row in self.df2.iterrows():
             for j in range(len(self.df2.columns)):
@@ -31,6 +41,9 @@ class Analise:
         return lst
 
     def player_list2(self):
+        '''
+        :return: List of all player in the dataframe
+        '''
         lst = []
         for i in range(1, len(self.df3.columns)):
             if self.df3.iloc[1, i] not in self.player_list:
@@ -38,6 +51,10 @@ class Analise:
         return lst
 
     def plot_multiple2(self):
+        '''
+        :return: Returns the name of the plot created from the dataframe, after saving it as a png file
+        '''
+        plt.clf()
         x = [0]
         y1 = [self.start_chips]
         y2 = [self.start_chips]
@@ -107,10 +124,16 @@ class StoreData:
         self.df = pd.DataFrame()
 
     def get_header_data(self):
+        '''
+        :return: Gets data from the game to make the header of the dataframe
+        '''
 
         pass
 
     def get_hand_data(self):
+        '''
+        :return: Gets data from the game to make the hand by hand section of the dataframe
+        '''
         for k, v in self.data.items():
             if k == 'ChipStart':
                 v.append(f'{len(v) - 1}')
@@ -120,6 +143,9 @@ class StoreData:
         pass
 
     def write_to_file(self):
+        '''
+        :return: Writes data to a txt file and saves it to the history directory
+        '''
         print(self.data['ChipStart'][0])
         self.df = pd.DataFrame(self.data)
         self.df.to_csv('history/test_write3.txt', index=False, sep='\t')

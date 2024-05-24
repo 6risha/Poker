@@ -1,6 +1,8 @@
 import random
 import numpy as np
 import copy
+from analysis.analysis import *
+from datetime import date
 
 
 class Card:
@@ -198,6 +200,14 @@ class Game:
         self.bot.chips = self.starting_chips
         self.bot.style = self.playing_style
 
+        # Data Writting
+        self.player_chips = {'chip_start': self.starting_chips,
+                             'Player1': [self.user.chips],
+                             'Player2': [self.bot.chips]}
+        # self.date
+        self.file_name = f'Game from test.txt'
+        self.data = StoreData(self.player_chips, self.user.name, self.bot.name, self.file_name)
+
         # Positions distribution
         self.players = [self.bot, self.user]
         random.shuffle(self.players)
@@ -219,8 +229,10 @@ class Game:
         self.pot = 0
         self.winner = None
 
+
     def play(self):
         i = 1
+        StoreData.get_header_data(self.data)
         while self.user.chips > 0 and self.bot.chips > 0:
             print(f':::: Hand #{i}')
             print()
@@ -270,16 +282,23 @@ class Game:
                 self.user.chips += self.pot//2
                 self.bot.chips += self.pot//2
 
+            self.player_chips['Player1'].append(self.user.chips)
+            self.player_chips['Player2'].append(self.bot.chips)
+
             print(f':::: End of the hand: {self.user.name} - {self.user.chips} chips | {self.bot.name} - {self.bot.chips} chips')
             print()
             self.swap_positions()
             self.clear()
             i += 1
+        print(self.player_chips)
+        StoreData.write_to_file(self.data)
 
         if self.user.chips <= 0:
             print(":::: Game over! You ran out of chips.")
         else:
             print(":::: Congratulations! You defeated the bot.")
+
+
 
     def clear(self):
         self.community_cards = []

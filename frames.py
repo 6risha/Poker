@@ -2,6 +2,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from cards import *
 from tests import create_hand
+from analysis.analysis import *
+import os
 
 
 class StartFrame(tk.Frame):
@@ -622,3 +624,48 @@ class Tutorial4(tk.Frame):
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.big_font = ('Courier New', 40, 'bold')
+        self.small_font = ('Courier New', 24, 'bold')
+
+        self.img = tk.PhotoImage(file='images/analyste-daffaires.png')
+        self.img = self.img.subsample(2)
+
+        self.button = []
+        for file in os.listdir('analysis/history'):
+            if '.txt' in file:
+                self.button.append([tk.Label(self, text=file, font=self.big_font, bg=self.window.bg_color,
+                                             fg=self.window.fg_color), 'analysis/history/' + f'{file}'])
+        for i in range(len(self.button)):
+            self.button[i][0].pack(side=tk.TOP)
+            self.button[i][0].bind('<Enter>', lambda event, lbl=self.button[i][0]: self.on_enter(lbl, event))
+            self.button[i][0].bind('<Leave>', lambda event, lbl=self.button[i][0]: self.on_leave(lbl, event))
+            self.assign_button(self.button[i][0], self.button[i][1])
+
+        self.button2 = tk.Label(self, text='<<', font= self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.button2.pack(side=tk.BOTTOM)
+        self.button2.bind('<Enter>', lambda event, lbl=self.button2: self.on_enter(lbl, event))
+        self.button2.bind('<Leave>', lambda event, lbl=self.button2: self.on_leave(lbl, event))
+        self.button2.bind('<Button-1>', lambda event: self.back_to_menu(event))
+
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
+
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
+
+    def back_to_menu(self, event):
+        self.pack_forget()
+        self.window.start_frame.pack(fill=tk.BOTH, expand=True)
+
+    def assign_button(self, button, file):
+        button.bind('<Button-1>', lambda event: self.open_graph(file, event))
+
+    def open_graph(self, file, event):
+        new_graph = Analise(file)
+        name = new_graph.plot_multiple2()
+
+        img = Image.open(name)
+        img.show()

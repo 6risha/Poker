@@ -294,13 +294,13 @@ class TutorialsFrame(tk.Frame):
     def open_next(self, menu, event):
         self.pack_forget()
         if menu == '1: Introduction to poker basics':
-            self.window.Tutorial_1.pack(fill=tk.BOTH, expand=True)
+            self.window.tutorials1.pack(fill=tk.BOTH, expand=True)
         elif menu == '2: Understanding Strategy and Probability':
-            self.window.Tutorial_2.pack(fill=tk.BOTH, expand=True)
+            self.window.tutorials2.pack(fill=tk.BOTH, expand=True)
         elif menu == '3: Advanced Concepts and Techniques':
-            self.window.Tutorial_3.pack(fill=tk.BOTH, expand=True)
+            self.window.tutorials3.pack(fill=tk.BOTH, expand=True)
         elif menu == '4: Practice and Improvement':
-            self.window.Tutorial_4.pack(fill=tk.BOTH, expand=True)
+            self.window.tutorials4.pack(fill=tk.BOTH, expand=True)
         
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
@@ -446,7 +446,7 @@ class Tutorial2(tk.Frame):
 
 
         # Load the image using PhotoImage
-        self.image = tk.PhotoImage(file="C:/Users/marni/Downloads/poker_odds.png")
+        self.image = tk.PhotoImage(file="images/poker_odds.png")
         #resize_image = image.resize((width, height))
         # Insert the image into the Text widget at the beginning of the second line
         self.text_2.image_create(tk.END, image=self.image)

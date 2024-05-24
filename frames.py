@@ -53,7 +53,8 @@ class StartFrame(tk.Frame):
     def open_next(self, menu, event):
         self.pack_forget()
         if menu == 'Game':
-            self.window.game_frame.pack(fill=tk.BOTH, expand=True)
+            # self.window.game_frame.pack(fill=tk.BOTH, expand=True)
+            self.window.game_frame.game.play()
         elif menu == 'Tutorials':
             self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
         elif menu == 'Analysis':
@@ -137,11 +138,14 @@ class GameFrame(tk.Frame):
         self.community_cards_frame = tk.Frame(self, bg=self.table_color)
         self.pot_label = tk.Label(self.community_cards_frame, text=self.game.pot, font=self.big_font, background=self.table_color)
         self.pot_label.pack()
+
+        self.community_cards_labels = []
         for card in self.game.community_cards:
             if card.suit == 1 or card.suit == 2:
                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.red_card_color, background=self.bg_card_color)
             else:
                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
+            self.community_cards_labels.append(label)
             label.pack(side=tk.LEFT, padx=10)
         self.community_cards_frame.pack(side=tk.TOP)
 
@@ -151,18 +155,20 @@ class GameFrame(tk.Frame):
         self.user_role_label = tk.Label(self.user_frame, text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB', font=self.big_font)
         self.user_hole_cards_frame = tk.Frame(self.user_frame)
 
+        self.user_cards_labels = []
         for card in self.game.user.hole_cards:
             if card.suit == 1 or card.suit == 2:
                 label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font, foreground=self.red_card_color, background=self.bg_card_color)
             else:
                 label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
+            self.user_cards_labels.append(label)
             label.pack(side=tk.LEFT, padx=10)
 
-        self.button_fame = tk.Frame(self.user_frame)
-        self.fold_button = tk.Button(self.button_fame, text="Fold", font=self.small_font)
-        self.check_button = tk.Button(self.button_fame, text="Check", font=self.small_font)
-        self.call_button = tk.Button(self.button_fame, text="Call", font=self.small_font)
-        self.raise_button = tk.Button(self.button_fame, text="Raise", font=self.small_font)
+        self.button_frame = tk.Frame(self.user_frame)
+        self.fold_button = tk.Button(self.button_frame, text="Fold", font=self.small_font)
+        self.check_button = tk.Button(self.button_frame, text="Check", font=self.small_font)
+        self.call_button = tk.Button(self.button_frame, text="Call", font=self.small_font)
+        self.raise_button = tk.Button(self.button_frame, text="Raise", font=self.small_font)
 
         self.fold_button.pack(side=tk.LEFT, padx=10)
         self.check_button.pack(side=tk.LEFT, padx=10)
@@ -174,10 +180,53 @@ class GameFrame(tk.Frame):
         self.user_hole_cards_frame.pack(side=tk.TOP)
         self.user_chips_label.pack(side=tk.TOP)
         self.user_role_label.pack(side=tk.TOP)
-        self.button_fame.pack(side=tk.TOP)
+        self.button_frame.pack(side=tk.TOP)
         self.raise_slider.pack(side=tk.TOP)
 
         self.user_frame.pack(side=tk.TOP, fill=tk.X)
+
+    def update(self):
+        # TODO:
+        # Update bot frame
+        self.bot_chips_label.config(text=self.game.bot.chips)
+        self.bot_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB')
+
+        # Update community cards frame
+        self.pot_label.config(text=self.game.pot)
+
+        # Remove all the card labels
+        for label in self.community_cards_labels:
+            label.destroy()
+            self.community_cards_labels.remove(label)
+
+        # Add new ones
+        for card in self.game.community_cards:
+            if card.suit == 1 or card.suit == 2:
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.red_card_color, background=self.bg_card_color)
+            else:
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.black_card_color, background=self.bg_card_color)
+            self.community_cards_labels.append(label)
+            label.pack(side=tk.LEFT, padx=10, pady=20)
+
+        # Update users frame
+
+        # Remove all the card labels
+        for label in self.user_cards_labels:
+            label.destroy()
+            self.user_cards_labels.remove(label)
+
+        # Add new ones
+        for card in self.game.user.hole_cards:
+            if card.suit == 1 or card.suit == 2:
+                label = tk.Label(self.user_frame, text=str(card), font=self.big_font,
+                                 foreground=self.red_card_color, background=self.bg_card_color)
+            else:
+                label = tk.Label(self.user_frame, text=str(card), font=self.big_font,
+                                 foreground=self.black_card_color, background=self.bg_card_color)
+            self.user_cards_labels.append(label)
+            label.pack(side=tk.LEFT, padx=10, pady=20)
 
 
 
@@ -198,12 +247,14 @@ class TutorialsFrame(tk.Frame):
         self.button_frame.pack()
 
         self.button_texts = ["1: Introduction to poker basics", "2: Understanding Strategy and Probability", "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
-        #for text in self.button_texts:
-         #   self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
-          #  self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
-            #self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
-           # self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
-            #self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
+
+        # for text in self.button_texts:
+        #     self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        #     self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
+        #     self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
+        #     self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
+        #     self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
+
         self.label_tuto1 = tk.Label(self, text="1: Introduction to poker basics", font=self.small_font, bg=self.window.bg_color,
                                    fg=self.window.fg_color)
         self.label_tuto1.pack(side=tk.TOP, pady=(100, 0))

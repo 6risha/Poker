@@ -95,32 +95,32 @@ class Bot(Player):
     def update_info_set(self):
         pass
 
-    def ask_action(self):
-        fold = ('fold', 0, 'p')
-        check = ('check', 0, 'p')
-        call = ('call', self.game.user.bet - self.bet, 'c')
-        raise_1bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind, 'b')
-        raise_2bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 2, 'b')
-        raise_4bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 4, 'b')
-        all_in = ('raise', self.chips)
-
-        actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
-        probabilities = [0.2, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05]
-        #actions = [fold, check, call, raise_1bb]
-
-        while True:
-            # Returns a list of 1 element, so we need an index at the end
-            action = random.choices(actions, weights=probabilities)[0]
-
-            # Remove unnecessary folds
-            if action[0] == 'fold' and self.bet == self.game.user.bet:
-                action = check
-            try:
-                self.validate_action(action)
-                print(f'{self}: {action}')
-                return action
-            except ValueError:
-                continue
+    # def ask_action(self):
+    #     fold = ('fold', 0, 'p')
+    #     check = ('check', 0, 'p')
+    #     call = ('call', self.game.user.bet - self.bet, 'c')
+    #     raise_1bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind, 'b')
+    #     raise_2bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 2, 'b')
+    #     raise_4bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 4, 'b')
+    #     all_in = ('raise', self.chips)
+    #
+    #     actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
+    #     probabilities = [0.2, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05]
+    #     #actions = [fold, check, call, raise_1bb]
+    #
+    #     while True:
+    #         # Returns a list of 1 element, so we need an index at the end
+    #         action = random.choices(actions, weights=probabilities)[0]
+    #
+    #         # Remove unnecessary folds
+    #         if action[0] == 'fold' and self.bet == self.game.user.bet:
+    #             action = check
+    #         try:
+    #             self.validate_action(action)
+    #             print(f'{self}: {action}')
+    #             return action
+    #         except ValueError:
+    #             continue
 
     def validate_action(self, action):
         act, bet = action
@@ -176,7 +176,11 @@ class User(Player):
 
 class Game:
     # This class is implemented only for heads-up poker
-    def __init__(self):
+    def __init__(self, frame=None, window=None):
+        # Pointer to the frame
+        self.frame = frame
+        self.window = window
+
         # Parameters of the game
         self.starting_chips = 10000
         self.small_blind = 250

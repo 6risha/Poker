@@ -1,0 +1,5 @@
+ChipStart	Player1	Player2
+10000	Thomas	Grisha
+Hand#	Player1	Player2
+0	10000	10000
+1	20000	0

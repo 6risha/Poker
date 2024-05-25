@@ -2,7 +2,7 @@ import random
 import numpy as np
 import copy
 from analysis.analysis import *
-from datetime import date
+import datetime
 
 
 class Card:
@@ -175,7 +175,6 @@ class User(Player):
     #     return act, bet
 
 
-
 class Game:
     # This class is implemented only for heads-up poker
     def __init__(self, frame=None, window=None):
@@ -204,8 +203,9 @@ class Game:
         self.player_chips = {'chip_start': self.starting_chips,
                              'Player1': [self.user.chips],
                              'Player2': [self.bot.chips]}
-        # self.date
-        self.file_name = f'Game from test.txt'
+        self.date = datetime.datetime.today()
+        print(self.date.strftime("%Y-%m-%d-%H-%M"))
+        self.file_name = f'Game_from_{self.date.strftime("%Y-%m-%d")}_at_{self.date.strftime("%H-%M")}.txt'
         self.data = StoreData(self.player_chips, self.user.name, self.bot.name, self.file_name)
 
         # Positions distribution

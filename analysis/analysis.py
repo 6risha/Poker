@@ -120,4 +120,4 @@ class StoreData:
         self.get_hand_data()
         self.df = pd.DataFrame(self.data)
         print(self.df)
-        self.df.to_csv(f'{self.file_name}', index=False, sep='\t')
+        self.df.to_csv(f'analysis/history/{self.file_name}', index=False, sep='\t')

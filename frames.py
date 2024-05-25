@@ -258,7 +258,7 @@ class TutorialsFrame(tk.Frame):
              self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
              self.label_tuto.bind('<Button-1>', lambda event, text=text: self.open_next(text, event))
 
-         # Exit button
+         # Exit buttons
         self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
                                       fg=self.window.fg_color)
         self.leave_tuto.pack()

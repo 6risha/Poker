@@ -300,7 +300,7 @@ class Tutorial1(tk.Frame):
         self.big_font = ('Lato', 40, 'bold')
         self.text_font = ('Lato', 12, 'bold')
 
-        # Exit button
+        # Exit buttons
         self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
                                    fg=self.window.fg_color)
         self.leave_tuto.pack()

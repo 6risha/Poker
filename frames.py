@@ -248,42 +248,15 @@ class TutorialsFrame(tk.Frame):
         self.button_frame = tk.Frame(self.window, bg='gray18')
         self.button_frame.pack()
 
-        self.button_texts = ["1: Introduction to poker basics", "2: Understanding Strategy and Probability", "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
+        self.tutorial_labels = [
+            "1: Introduction to poker basics", "2: Understanding Strategy and Probability", "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
 
-        # for text in self.button_texts:
-        #     self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
-        #     self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
-        #     self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
-        #     self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
-        #     self.label_tuto.bind('<Button-1>', lambda event: self.open_next(text, event))
-
-        self.label_tuto1 = tk.Label(self, text="1: Introduction to poker basics", font=self.small_font, bg=self.window.bg_color,
-                                   fg=self.window.fg_color)
-        self.label_tuto1.pack(side=tk.TOP, pady=(100, 0))
-        self.label_tuto1.bind('<Enter>', lambda event, lbl=self.label_tuto1: self.on_enter(lbl, event))
-        self.label_tuto1.bind('<Leave>', lambda event, lbl=self.label_tuto1: self.on_leave(lbl, event))
-        self.label_tuto1.bind('<Button-1>', lambda event: self.open_next("1: Introduction to poker basics", event))
-
-        self.label_tuto2 = tk.Label(self, text="2: Understanding Strategy and Probability", font=self.small_font, bg=self.window.bg_color,
-                                    fg=self.window.fg_color)
-        self.label_tuto2.pack(side=tk.TOP, pady=(100, 0))
-        self.label_tuto2.bind('<Enter>', lambda event, lbl=self.label_tuto2: self.on_enter(lbl, event))
-        self.label_tuto2.bind('<Leave>', lambda event, lbl=self.label_tuto2: self.on_leave(lbl, event))
-        self.label_tuto2.bind('<Button-1>', lambda event: self.open_next("2: Understanding Strategy and Probability", event))
-
-        self.label_tuto3 = tk.Label(self, text="3: Advanced Concepts and Techniques", font=self.small_font, bg=self.window.bg_color,
-                                    fg=self.window.fg_color)
-        self.label_tuto3.pack(side=tk.TOP, pady=(100, 0))
-        self.label_tuto3.bind('<Enter>', lambda event, lbl=self.label_tuto3: self.on_enter(lbl, event))
-        self.label_tuto3.bind('<Leave>', lambda event, lbl=self.label_tuto3: self.on_leave(lbl, event))
-        self.label_tuto3.bind('<Button-1>', lambda event: self.open_next("3: Advanced Concepts and Techniques", event))
-
-        self.label_tuto4 = tk.Label(self, text="4: Practice and Improvement", font=self.small_font, bg=self.window.bg_color,
-                                    fg=self.window.fg_color)
-        self.label_tuto4.pack(side=tk.TOP, pady=(100, 0))
-        self.label_tuto4.bind('<Enter>', lambda event, lbl=self.label_tuto4: self.on_enter(lbl, event))
-        self.label_tuto4.bind('<Leave>', lambda event, lbl=self.label_tuto4: self.on_leave(lbl, event))
-        self.label_tuto4.bind('<Button-1>', lambda event: self.open_next("4: Practice and Improvement", event))
+        for text in self.tutorial_labels:
+             self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+             self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
+             self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
+             self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
+             self.label_tuto.bind('<Button-1>', lambda event, text=text: self.open_next(text, event))
 
          # Exit button
         self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
@@ -295,14 +268,16 @@ class TutorialsFrame(tk.Frame):
 
     def open_next(self, menu, event):
         self.pack_forget()
-        if menu == '1: Introduction to poker basics':
-            self.window.tutorials1.pack(fill=tk.BOTH, expand=True)
-        elif menu == '2: Understanding Strategy and Probability':
-            self.window.tutorials2.pack(fill=tk.BOTH, expand=True)
-        elif menu == '3: Advanced Concepts and Techniques':
-            self.window.tutorials3.pack(fill=tk.BOTH, expand=True)
-        elif menu == '4: Practice and Improvement':
-            self.window.tutorials4.pack(fill=tk.BOTH, expand=True)
+        tutorial_windows = {
+            "1: Introduction to poker basics": self.window.tutorials1,
+            "2: Understanding Strategy and Probability": self.window.tutorials2,
+            "3: Advanced Concepts and Techniques": self.window.tutorials3,
+            "4: Practice and Improvement": self.window.tutorials4
+        }
+
+        for text, window in tutorial_windows.items():
+            if menu == text:
+                window.pack(fill=tk.BOTH, expand=True)
         
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)

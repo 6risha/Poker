@@ -92,7 +92,7 @@ class StoreData:
         self.data = {'ChipStart': [self.chip_start, 'Hand#'],
                      'Player1': ['', 'Player1'],
                      'Player2': ['', 'Player2']}
-        print(self.data)
+        # print(self.data)
         self.df = pd.DataFrame()
 
     def get_header_data(self):

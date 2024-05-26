@@ -22,25 +22,29 @@ class StartFrame(tk.Frame):
         self.label_1 = tk.Label(self, image=self.img, bg=self.window.bg_color, fg=self.window.fg_color)
         self.label_1.pack(side=tk.TOP)
 
-        self.label_2 = tk.Label(self, text='Start', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label_2 = tk.Label(self, text='Start', font=self.big_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
         self.label_2.pack(side=tk.TOP)
         self.label_2.bind('<Enter>', lambda event, lbl=self.label_2: self.on_enter(lbl, event))
         self.label_2.bind('<Leave>', lambda event, lbl=self.label_2: self.on_leave(lbl, event))
         self.label_2.bind('<Button-1>', lambda event: self.open_next('Game', event))
 
-        self.label_3 = tk.Label(self, text='Tutorials', font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label_3 = tk.Label(self, text='Tutorials', font=self.small_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
         self.label_3.pack(side=tk.TOP, pady=(100, 0))
         self.label_3.bind('<Enter>', lambda event, lbl=self.label_3: self.on_enter(lbl, event))
         self.label_3.bind('<Leave>', lambda event, lbl=self.label_3: self.on_leave(lbl, event))
         self.label_3.bind('<Button-1>', lambda event: self.open_next('Tutorials', event))
 
-        self.label_4 = tk.Label(self, text='Analysis', font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label_4 = tk.Label(self, text='Analysis', font=self.small_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
         self.label_4.pack(side=tk.TOP)
         self.label_4.bind('<Enter>', lambda event, lbl=self.label_4: self.on_enter(lbl, event))
         self.label_4.bind('<Leave>', lambda event, lbl=self.label_4: self.on_leave(lbl, event))
         self.label_4.bind('<Button-1>', lambda event: self.open_next('Analysis', event))
 
-        self.label_5 = tk.Label(self, text='Settings', font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label_5 = tk.Label(self, text='Settings', font=self.small_font, bg=self.window.bg_color,
+                                fg=self.window.fg_color)
         self.label_5.pack(side=tk.TOP)
         self.label_5.bind('<Enter>', lambda event, lbl=self.label_5: self.on_enter(lbl, event))
         self.label_5.bind('<Leave>', lambda event, lbl=self.label_5: self.on_leave(lbl, event))
@@ -55,8 +59,8 @@ class StartFrame(tk.Frame):
     def open_next(self, menu, event):
         self.pack_forget()
         if menu == 'Game':
-            # self.window.game_frame.pack(fill=tk.BOTH, expand=True)
-            self.window.game_frame.game.play()
+            self.window.game_frame.pack(fill=tk.BOTH, expand=True)
+            # self.window.game_frame.game.play()
         elif menu == 'Tutorials':
             self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
         elif menu == 'Analysis':
@@ -78,34 +82,54 @@ class SettingsFrame(tk.Frame):
         self.blind_size = tk.DoubleVar()
         self.min_blind_size = 250
         self.max_blind_size = 1000
-        self.scale1 = tk.Scale(self, orient='horizontal', from_=self.min_blind_size, to=self.max_blind_size, tickinterval=250, length=400, label='Small blind size', variable=self.blind_size, resolution=250, font=self.small_font)
+        self.scale1 = tk.Scale(self, orient='horizontal', from_=self.min_blind_size, to=self.max_blind_size,
+                               tickinterval=250, length=400, label='Small blind size', variable=self.blind_size,
+                               resolution=250, font=self.small_font)
         self.scale1.pack(pady=30, padx=10)
 
         # Set starting chips amount
         self.starting_chips = tk.DoubleVar()
         self.min_chips = 5000
         self.max_chips = 15000
-        self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips + 2000, tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips, resolution=5000, font=self.small_font)
+        self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips + 2000,
+                               tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips,
+                               resolution=5000, font=self.small_font)
         self.scale2.pack(pady=30, padx=10)
 
         # Blind increase
         self.blind_increase = tk.IntVar()
         self.blind_increase.set(0)
-        self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=300, label='Blind increase', variable=self.blind_increase, tickinterval=1, font=self.small_font)
+        self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=300, label='Blind increase',
+                               variable=self.blind_increase, tickinterval=1, font=self.small_font)
         self.scale3.pack(pady=30, padx=10)
 
+        # Bot playing style
+        self.styles = ["Optimal", "LAG", "TAG", "TP", "LP"]
+        self.selected_style = tk.StringVar()
+        self.selected_style.set(self.styles[0])
+        self.scale4 = tk.Scale(self, from_=0, to=len(self.styles) - 1, length=300, label="Bot style",
+                               orient=tk.HORIZONTAL, command=self.update_label, showvalue=False, font=self.small_font)
+        self.scale4.pack(pady=(30, 10), padx=10)
+        self.label1 = tk.Label(self, text=self.styles[0], font=self.small_font)
+        self.label1.pack(pady=(0, 30))
+
         # Exit button
-        self.label_1 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
-        self.label_1.pack()
-        self.label_1.bind('<Enter>', lambda event, lbl=self.label_1: self.on_enter(lbl, event))
-        self.label_1.bind('<Leave>', lambda event, lbl=self.label_1: self.on_leave(lbl, event))
-        self.label_1.bind('<Button-1>', lambda event: self.exit(event))
+        self.label2 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label2.pack()
+        self.label2.bind('<Enter>', lambda event, lbl=self.label2: self.on_enter(lbl, event))
+        self.label2.bind('<Leave>', lambda event, lbl=self.label2: self.on_leave(lbl, event))
+        self.label2.bind('<Button-1>', lambda event: self.exit(event))
 
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
     def on_leave(self, label, event):
         label.config(fg=self.window.fg_color)
+
+    def update_label(self, value):
+        chosen_style = self.styles[int(value)]
+        self.label1.config(text=chosen_style)
+        self.selected_style.set(chosen_style)
 
     def exit(self, event):
         self.pack_forget()
@@ -131,22 +155,27 @@ class GameFrame(tk.Frame):
         # Bot Frame
         self.bot_frame = tk.Frame(self)
         self.bot_chips_label = tk.Label(self.bot_frame, text=self.game.bot.chips, font=self.big_font)
-        self.bot_role_label = tk.Label(self.bot_frame, text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB', font=self.big_font)
+        self.bot_role_label = tk.Label(self.bot_frame,
+                                       text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB',
+                                       font=self.big_font)
         self.bot_chips_label.pack()
         self.bot_role_label.pack()
         self.bot_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Community Cards Frame
         self.community_cards_frame = tk.Frame(self, bg=self.table_color)
-        self.pot_label = tk.Label(self.community_cards_frame, text=self.game.pot, font=self.big_font, background=self.table_color)
+        self.pot_label = tk.Label(self.community_cards_frame, text=self.game.pot, font=self.big_font,
+                                  background=self.table_color)
         self.pot_label.pack()
 
         self.community_cards_labels = []
         for card in self.game.community_cards:
             if card.suit == 1 or card.suit == 2:
-                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.red_card_color, background=self.bg_card_color)
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.red_card_color, background=self.bg_card_color)
             else:
-                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.black_card_color, background=self.bg_card_color)
             self.community_cards_labels.append(label)
             label.pack(side=tk.LEFT, padx=10)
         self.community_cards_frame.pack(side=tk.TOP)
@@ -154,15 +183,19 @@ class GameFrame(tk.Frame):
         # User Frame
         self.user_frame = tk.Frame(self)
         self.user_chips_label = tk.Label(self.user_frame, text=self.game.user.chips, font=self.big_font)
-        self.user_role_label = tk.Label(self.user_frame, text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB', font=self.big_font)
+        self.user_role_label = tk.Label(self.user_frame,
+                                        text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB',
+                                        font=self.big_font)
         self.user_hole_cards_frame = tk.Frame(self.user_frame)
 
         self.user_cards_labels = []
         for card in self.game.user.hole_cards:
             if card.suit == 1 or card.suit == 2:
-                label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font, foreground=self.red_card_color, background=self.bg_card_color)
+                label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.red_card_color, background=self.bg_card_color)
             else:
-                label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font, foreground=self.black_card_color, background=self.bg_card_color)
+                label = tk.Label(self.user_hole_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.black_card_color, background=self.bg_card_color)
             self.user_cards_labels.append(label)
             label.pack(side=tk.LEFT, padx=10)
 
@@ -177,7 +210,8 @@ class GameFrame(tk.Frame):
         self.call_button.pack(side=tk.LEFT, padx=10)
         self.raise_button.pack(side=tk.LEFT, padx=10)
 
-        self.raise_slider = tk.Scale(self.user_frame, from_=0, to=self.game.user.chips, orient=tk.HORIZONTAL, font=self.small_font)
+        self.raise_slider = tk.Scale(self.user_frame, from_=0, to=self.game.user.chips, orient=tk.HORIZONTAL,
+                                     font=self.small_font)
 
         self.user_hole_cards_frame.pack(side=tk.TOP)
         self.user_chips_label.pack(side=tk.TOP)
@@ -231,11 +265,10 @@ class GameFrame(tk.Frame):
             label.pack(side=tk.LEFT, padx=10, pady=20)
 
 
-
 class TutorialsFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
-        
+
         self.window = window
         self.configure(bg=self.window.bg_color)
 
@@ -249,18 +282,20 @@ class TutorialsFrame(tk.Frame):
         self.button_frame.pack()
 
         self.tutorial_labels = [
-            "1: Introduction to poker basics", "2: Understanding Strategy and Probability", "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
+            "1: Introduction to poker basics", "2: Understanding Strategy and Probability",
+            "3: Advanced Concepts and Techniques", "4: Practice and Improvement"]
 
         for text in self.tutorial_labels:
-             self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color, fg=self.window.fg_color)
-             self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
-             self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
-             self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
-             self.label_tuto.bind('<Button-1>', lambda event, text=text: self.open_next(text, event))
+            self.label_tuto = tk.Label(self, text=text, font=self.small_font, bg=self.window.bg_color,
+                                       fg=self.window.fg_color)
+            self.label_tuto.pack(side=tk.TOP, pady=(100, 0))
+            self.label_tuto.bind('<Enter>', lambda event, lbl=self.label_tuto: self.on_enter(lbl, event))
+            self.label_tuto.bind('<Leave>', lambda event, lbl=self.label_tuto: self.on_leave(lbl, event))
+            self.label_tuto.bind('<Button-1>', lambda event, text=text: self.open_next(text, event))
 
-         # Exit buttons
+        # Exit buttons
         self.leave_tuto = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color,
-                                      fg=self.window.fg_color)
+                                   fg=self.window.fg_color)
         self.leave_tuto.pack()
         self.leave_tuto.bind('<Enter>', lambda event, lbl=self.leave_tuto: self.on_enter(lbl, event))
         self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
@@ -278,7 +313,7 @@ class TutorialsFrame(tk.Frame):
         for text, window in tutorial_windows.items():
             if menu == text:
                 window.pack(fill=tk.BOTH, expand=True)
-        
+
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
@@ -308,21 +343,17 @@ class Tutorial1(tk.Frame):
         self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
         self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
 
-        self.main_label = tk.Label(self, text="1: Introduction to poker basics", bg='gray18', fg='white', font=self.big_font)
+        self.main_label = tk.Label(self, text="1: Introduction to poker basics", bg='gray18', fg='white',
+                                   font=self.big_font)
         self.main_label.pack(pady=20)
 
         self.button_frame = tk.Frame(self.window, bg='gray18')
         self.button_frame.pack()
 
-
-
         #########################################
 
-
-
-
         self.text_1 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
-                                   font=self.text_font)
+                              font=self.text_font)
         self.text_1.pack(expand=True, fill='both', padx=20, pady=20)
 
         self.text_1.tag_configure("big", font=("Lato", 20))
@@ -355,7 +386,7 @@ class Tutorial1(tk.Frame):
 
         self.long_text_1_1 = (
             "..."
-             )
+        )
         self.text_1.insert(tk.END, self.long_text_1_1)
 
     def on_enter(self, label, event):
@@ -367,6 +398,7 @@ class Tutorial1(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
+
 
 class Tutorial2(tk.Frame):
     def __init__(self, window):
@@ -393,10 +425,10 @@ class Tutorial2(tk.Frame):
         self.button_frame = tk.Frame(self.window, bg='gray18')
         self.button_frame.pack()
 
-    #########################################
+        #########################################
 
         self.text_2 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
-                          font=self.text_font)
+                              font=self.text_font)
         self.text_2.pack(expand=True, fill='both', padx=20, pady=20)
         self.text_2.tag_configure("big", font=("Lato", 20))
         self.text_2.tag_configure("small", font=("Lato", 10))
@@ -406,36 +438,34 @@ class Tutorial2(tk.Frame):
         self.subtitle1 = "Basic strategy\n\n"
         self.text_2.insert(tk.END, self.subtitle1, "big")
 
-    # Insert some initial text without explicit newlines
+        # Insert some initial text without explicit newlines
         self.long_text_2 = (
-        "A player needs to develop a sense for the power of the hand they are dealt. This will enable them to male the good decisions, know when to fold, when to bet, and when to limp.\n\n"
-        "Limping is when a player tries to go the furthest in a hand without wagering a lot of chips, as they are unsure of their hand. This also means they will know what sized raises they should call with their hands, and where the limit is, in terms of chips, between calling and folding.\n\n"
-        "Pocket pairs, meaning being dreamt pairs are considered as strong, as whatever the flop, turn and river may be, they already have a pair at worst. This can also easily lead to 3 of a kind or even a set.\n\n"
-        "Apart from that, suited hands, meaning both cards are of the same colour, are appreciated, as this opens up the possibility of a flush.\n\n"
-        "Moreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
-        "Of course, a straight can still be had, but only with one card as the two are too far apart to be on the same straight, meaning that 4 cards are dealt on the table in a straight configuration, making it easy for other players to also have a straight.\n\n"
-        "Between all these cases there are a lot of other ordinary hands, but in general, the higher the values of the cards the better. \n\n"
+            "A player needs to develop a sense for the power of the hand they are dealt. This will enable them to male the good decisions, know when to fold, when to bet, and when to limp.\n\n"
+            "Limping is when a player tries to go the furthest in a hand without wagering a lot of chips, as they are unsure of their hand. This also means they will know what sized raises they should call with their hands, and where the limit is, in terms of chips, between calling and folding.\n\n"
+            "Pocket pairs, meaning being dreamt pairs are considered as strong, as whatever the flop, turn and river may be, they already have a pair at worst. This can also easily lead to 3 of a kind or even a set.\n\n"
+            "Apart from that, suited hands, meaning both cards are of the same colour, are appreciated, as this opens up the possibility of a flush.\n\n"
+            "Moreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
+            "Of course, a straight can still be had, but only with one card as the two are too far apart to be on the same straight, meaning that 4 cards are dealt on the table in a straight configuration, making it easy for other players to also have a straight.\n\n"
+            "Between all these cases there are a lot of other ordinary hands, but in general, the higher the values of the cards the better. \n\n"
         )
         self.text_2.insert(tk.END, self.long_text_2)
 
         self.subtitle1 = "Probability and odds\n"
         self.text_2.insert(tk.END, self.subtitle1, "big")
 
-
         # Load the image using PhotoImage
         self.image = tk.PhotoImage(file="images/poker_odds.png")
-        #resize_image = image.resize((width, height))
+        # resize_image = image.resize((width, height))
         # Insert the image into the Text widget at the beginning of the second line
         self.text_2.image_create(tk.END, image=self.image)
 
         self.long_text_2_1 = (
-        "In pre-flo, each hand has a certain probability of winning, classified in the poker hand power chart. In this chart, all the possible hands are represented.\n\n"
-        "The “o” means off-suit, “s” means suited, meaning that they are the same colour or oppositely two different colours.\n"
-        "The number associated to the hand is the percentage of hands that are stronger.\n"
-        "So, for a pair ofaces, this number is 0, as 0% of hands are stronger.\n\n"
+            "In pre-flo, each hand has a certain probability of winning, classified in the poker hand power chart. In this chart, all the possible hands are represented.\n\n"
+            "The “o” means off-suit, “s” means suited, meaning that they are the same colour or oppositely two different colours.\n"
+            "The number associated to the hand is the percentage of hands that are stronger.\n"
+            "So, for a pair ofaces, this number is 0, as 0% of hands are stronger.\n\n"
         )
         self.text_2.insert(tk.END, self.long_text_2_1)
-
 
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
@@ -446,6 +476,7 @@ class Tutorial2(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
+
 
 class Tutorial3(tk.Frame):
     def __init__(self, window):
@@ -521,6 +552,7 @@ class Tutorial3(tk.Frame):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
 
+
 class Tutorial4(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
@@ -585,7 +617,6 @@ class Tutorial4(tk.Frame):
         )
         self.text_2.insert(tk.END, self.long_text_2_1)
 
-
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
@@ -595,6 +626,7 @@ class Tutorial4(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
+
 
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):
@@ -621,7 +653,7 @@ class AnalysisFrame(tk.Frame):
             self.button[i][0].bind('<Leave>', lambda event, lbl=self.button[i][0]: self.on_leave(lbl, event))
             self.assign_button(self.button[i][0], self.button[i][1])
 
-        self.button2 = tk.Label(self, text='<<', font= self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.button2 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.button2.pack(side=tk.BOTTOM)
         self.button2.bind('<Enter>', lambda event, lbl=self.button2: self.on_enter(lbl, event))
         self.button2.bind('<Leave>', lambda event, lbl=self.button2: self.on_leave(lbl, event))

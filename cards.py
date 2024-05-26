@@ -84,8 +84,7 @@ class Bot(Player):
         # TP - tight passive (plays only strongest hands, calls every bet)
         # LAG - loose aggressive (plays every hand, raises actively)
         # TAG - tight aggressive (plays only strongest hands, raises actively)
-        self.style = 'Calculated Strategy'
-
+        self.style = "LAG"
 
         self.history = ''
         self.info_set = ''
@@ -97,35 +96,42 @@ class Bot(Player):
     def update_info_set(self):
         pass
 
-    # def ask_action(self):
-    #     fold = ('fold', 0, 'p')
-    #     check = ('check', 0, 'p')
-    #     call = ('call', self.game.user.bet - self.bet, 'c')
-    #     raise_1bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind, 'b')
-    #     raise_2bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 2, 'b')
-    #     raise_4bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 4, 'b')
-    #     all_in = ('raise', self.chips)
-    #
-    #     actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
-    #     probabilities = [0.2, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05]
-    #     #actions = [fold, check, call, raise_1bb]
-    #
-    #     while True:
-    #         # Returns a list of 1 element, so we need an index at the end
-    #         action = random.choices(actions, weights=probabilities)[0]
-    #
-    #         # Remove unnecessary folds
-    #         if action[0] == 'fold' and self.bet == self.game.user.bet:
-    #             action = check
-    #         try:
-    #             self.validate_action(action)
-    #             print(f'{self}: {action}')
-    #             return action
-    #         except ValueError:
-    #             continue
+    def ask_action(self):
+        fold = ('fold', 0, 'p')
+        check = ('check', 0, 'p')
+        call = ('call', self.game.user.bet - self.bet, 'c')
+        raise_1bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind, 'b')
+        raise_2bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 2, 'b')
+        raise_4bb = ('raise', (self.game.user.bet - self.bet) + self.game.big_blind * 4, 'b')
+        all_in = ('raise', self.chips, 'b')
+
+        actions = [fold, check, call, raise_1bb, raise_2bb, raise_4bb, all_in]
+
+        base_strategies = {
+            'Optimal': [0.2, 0.3, 0.2, 0.14, 0.1, 0.05, 0.01],
+            'LAG': [0.2, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05],
+            'TAG': [0.05, 0.2, 0.1, 0.25, 0.2, 0.15, 0.05],
+            'TP': [0.1, 0.25, 0.4, 0.1, 0.05, 0.05, 0.05],
+            'LP': [0.1, 0.3, 0.4, 0.1, 0.05, 0.03, 0.02]
+        }
+        base_strategy = base_strategies[self.style]
+
+        while True:
+            # Returns a list of 1 element, so we need an index at the end
+            action = random.choices(actions, weights=base_strategy)[0]
+            # print(action)
+            try:
+                # Remove unnecessary folds first
+                if action[0] == 'fold' and self.bet == self.game.user.bet:
+                    action = check
+                self.validate_action(action)
+                print(f'{self}: {action}')
+                return action[0], action[1]
+            except ValueError:
+                continue
 
     def validate_action(self, action):
-        act, bet = action
+        act, bet = action[0], action[1]
         opponent = self.game.user
 
         if act == 'fold':
@@ -186,7 +192,7 @@ class Game:
         self.starting_chips = 10000
         self.small_blind = 250
         self.increasing_blinds = False
-        self.playing_style = None
+        self.playing_style = 'Optimal'
 
         # User
         self.user = User()
@@ -204,7 +210,6 @@ class Game:
                              'Player1': [self.user.chips],
                              'Player2': [self.bot.chips]}
         self.date = datetime.datetime.today()
-        print(self.date.strftime("%Y-%m-%d-%H-%M"))
         self.file_name = f'Game_from_{self.date.strftime("%Y-%m-%d")}_at_{self.date.strftime("%H-%M")}.txt'
         self.data = StoreData(self.player_chips, self.user.name, self.bot.name, self.file_name)
 
@@ -231,6 +236,10 @@ class Game:
 
 
     def play(self):
+        # Messages about game initialization
+        print(f':::: New Game: {self.date.strftime("%Y-%m-%d-%H-%M")}')
+        print(f':::: Bot Playing Style: {self.bot.style}')
+
         i = 1
         StoreData.get_header_data(self.data)
         while self.user.chips > 0 and self.bot.chips > 0:
@@ -297,8 +306,6 @@ class Game:
             print(":::: Game over! You ran out of chips.")
         else:
             print(":::: Congratulations! You defeated the bot.")
-
-
 
     def clear(self):
         self.community_cards = []

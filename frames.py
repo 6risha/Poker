@@ -514,31 +514,39 @@ class Tutorial3(tk.Frame):
         self.text_2.tag_configure("bold", font=("Lato", 13, "bold"))
         self.text_2.tag_configure("italic", font=("Lato", 13, "italic"))
 
-        self.subtitle1 = "Basic strategy\n\n"
+        self.subtitle1 = "Bluffing & deception\n\n"
         self.text_2.insert(tk.END, self.subtitle1, "big")
 
         # Insert some initial text without explicit newlines
         self.long_text_2 = (
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
+            "Bluffing is the action of raising by a big amount of chips, without having a strong hand. Its purpose is to deceive another player, making them think that one has a very strong, almost unbeatable hand, and thus making them fold and winning the hand.\n\n"
+            "To male this technique more advanced, one should look at the cards on the table. If the table makes a lot of powerful combinations possible, often called a wet board, then bluffing will be easier. This is because other players can see that there is also a non-negligible chance of one having a strong hand, thus not daring to challenge the bluff.\n\n"
+            "On the other hand, if to have a string combination one has to have a very specific hand, bluffing is harder, as other players will be more inclined to challenge the fact that in fact, one has that specific hand, calling and hoping to win a big amount of chips coming from the bluff.\n\n"
+            "Of course, if one has said specific hand, they can either lay low, bet small and grow the pot trying to keep the players in the hand without folding, or bet big, hoping that at least one player will think it is a bluff and call that big raise.\n\n"
+            "From there comes an infinite circle, and the only advice that should be taken is that strategy should be adapted to the behaviour and habits of other players around the table. The chip count of players might also affect their capability and inclination to bluff. It should also be carefully adapted to the table.\n\n"
         )
         self.text_2.insert(tk.END, self.long_text_2)
 
-        self.subtitle1 = "Gameplay and betting structure\n\n"
+        self.subtitle1 = "Opponents and table dynamics\n\n"
         self.text_2.insert(tk.END, self.subtitle1, "big")
 
         self.long_text_2_1 = (
-            "..."
+            "One should keep track for the entirety of the game of the behaviours, patterns and habits of all the other players. Patterns are created and prepared strategies that players use, in which, for all situations betting amounts, acceptable call amounts and fold conditions are determined.\n\n"
+            "These of course all need the judgement of the player to be perfect, to know which situation they are in. These are dangerous, as if one’s pattern becomes known to another player, by repeating betting amounts and strategies.\n\n"
+            "This can be exploited.\n\n"
+            "If a player plays without patterns, they are still going to have a general behaviour, depending on their style and personality. This is much less systematic and depends on way more parameters, so these are harder to exploit. On the other hand, they sometimes lead to errors that wouldn’t have happened with a pattern. \n\n"
+            "Each player will also have tells, in body language or even in body function. When one discovers their cards, they will feel pleased or displeased, and noone can totally hide their emotions.\n\n"
+            "These are what we call tells, which can range from eye movement, breath depth and rhythm to swallowing reflexes. Again, these can be exploited.\n\n"
+        )
+        self.text_2.insert(tk.END, self.long_text_2_1)
+
+        self.subtitle1 = "Bet sizing\n\n"
+        self.text_2.insert(tk.END, self.subtitle1, "big")
+
+        self.long_text_2_1 = (
+            "Bets should be sized according to the type of play we would like to obtain. For example, a bluff will be an unusually large bet compared to the pot and the table. Value bets, when one is nearly sure of winning the hand, is a relatively small bet, small enough to be realistically called by another player. For this one should not appear too confident in their previous plays.\n\n"
+            "Continuation betting resembles value betting. It differs in the fact that one is not sure of winning the hand. The board and hand looks promising, but nothing promising came out yet.\n"
+            "So, the player feels like their hand has the most chance of winning, thus they slowly grow the pot hoping that their winning card will be turned over. Of course, when there is an infinitesimal chance of winning a hand, one should not continuation bet.\n\n"
         )
         self.text_2.insert(tk.END, self.long_text_2_1)
 

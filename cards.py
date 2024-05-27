@@ -88,13 +88,14 @@ class Bot(Player):
 
         self.history = ''
         self.info_set = ''
-        self.tree_map = self.get_strategies()
+        self.tree_map = self.load_strategies()
 
-    def get_strategies(self):
+    def load_strategies(self):
         pass
 
     def update_info_set(self):
-        pass
+        sorted_cards = sorted(self.hole_cards + self.game.community_cards, key=lambda card: (card.rank, card.suit))
+        self.info_set = ''.join(str(card) for card in sorted_cards)
 
     def ask_action(self):
         fold = ('fold', 0, 'p')
@@ -319,6 +320,7 @@ class Game:
         self.bot.bet = 0
         self.bot.hole_cards = []
         self.bot.fold = False
+        self.bot.info_set = ''
 
         self.winner = None
 
@@ -358,6 +360,8 @@ class Game:
                     player.make_bet(self.big_blind - player.bet)
                     print(f'{opponent.name} is already all-in')
                     return True
+                elif act == 'raise':
+                    pass
                 elif act == 'fold':
                     player.fold = True
                     print(f'{player.name} has folded')

@@ -79,18 +79,20 @@ class SettingsFrame(tk.Frame):
         self.small_font = ('Courier New', 24, 'bold')
 
         # Set blinds sizes
-        self.blind_size = tk.DoubleVar()
+        self.blind_size = tk.IntVar()
         self.min_blind_size = 250
         self.max_blind_size = 1000
+        self.blind_size.set(345)
         self.scale1 = tk.Scale(self, orient='horizontal', from_=self.min_blind_size, to=self.max_blind_size,
                                tickinterval=250, length=400, label='Small blind size', variable=self.blind_size,
                                resolution=250, font=self.small_font)
         self.scale1.pack(pady=30, padx=10)
 
         # Set starting chips amount
-        self.starting_chips = tk.DoubleVar()
+        self.starting_chips = tk.IntVar()
         self.min_chips = 5000
         self.max_chips = 15000
+        self.starting_chips.set(6000)
         self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips + 2000,
                                tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips,
                                resolution=5000, font=self.small_font)
@@ -140,7 +142,10 @@ class GameFrame(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
 
-        self.game = Game()
+        self.window = window
+        self.configure(bg=self.window.bg_color)
+
+        self.game = Game(frame=self, window=self.window)
         self.game.community_cards = create_hand(['3♠', '7♦', '9♠', '10♣', 'Q♠'])
         self.game.user.hole_cards = create_hand(['9♦', '8♠'])
 
@@ -154,18 +159,19 @@ class GameFrame(tk.Frame):
 
         # Bot Frame
         self.bot_frame = tk.Frame(self)
-        self.bot_chips_label = tk.Label(self.bot_frame, text=self.game.bot.chips, font=self.big_font)
-        self.bot_role_label = tk.Label(self.bot_frame,
-                                       text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB',
-                                       font=self.big_font)
+        self.bot_frame.configure(bg=self.window.bg_color)
+        self.bot_style_label = tk.Label(self.bot_frame, text=self.game.bot.style, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.bot_chips_label = tk.Label(self.bot_frame, text=self.game.bot.chips, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.bot_role_label = tk.Label(self.bot_frame, text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.bot_style_label.pack()
         self.bot_chips_label.pack()
         self.bot_role_label.pack()
-        self.bot_frame.pack(side=tk.TOP, fill=tk.X)
+        self.bot_frame.pack(side=tk.TOP, fill=tk.X, pady=(0, 50))
 
         # Community Cards Frame
         self.community_cards_frame = tk.Frame(self, bg=self.table_color)
         self.pot_label = tk.Label(self.community_cards_frame, text=self.game.pot, font=self.big_font,
-                                  background=self.table_color)
+                                  bg=self.table_color, fg=self.window.fg_color)
         self.pot_label.pack()
 
         self.community_cards_labels = []
@@ -177,17 +183,18 @@ class GameFrame(tk.Frame):
                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
                                  foreground=self.black_card_color, background=self.bg_card_color)
             self.community_cards_labels.append(label)
-            label.pack(side=tk.LEFT, padx=10)
-        self.community_cards_frame.pack(side=tk.TOP)
+            label.pack(side=tk.LEFT, padx=10, pady=(10, 30))
+        self.community_cards_frame.pack(side=tk.TOP, pady=(0, 50), padx=50)
 
         # User Frame
         self.user_frame = tk.Frame(self)
-        self.user_chips_label = tk.Label(self.user_frame, text=self.game.user.chips, font=self.big_font)
+        self.user_frame.configure(bg=self.window.bg_color)
+        self.user_chips_label = tk.Label(self.user_frame, text=self.game.user.chips, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.user_role_label = tk.Label(self.user_frame,
                                         text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB',
-                                        font=self.big_font)
+                                        font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.user_hole_cards_frame = tk.Frame(self.user_frame)
-
+        self.user_hole_cards_frame.configure(bg=self.window.bg_color)
         self.user_cards_labels = []
         for card in self.game.user.hole_cards:
             if card.suit == 1 or card.suit == 2:
@@ -200,6 +207,7 @@ class GameFrame(tk.Frame):
             label.pack(side=tk.LEFT, padx=10)
 
         self.button_frame = tk.Frame(self.user_frame)
+        self.button_frame.configure(bg=self.window.bg_color)
         self.fold_button = tk.Button(self.button_frame, text="Fold", font=self.small_font)
         self.check_button = tk.Button(self.button_frame, text="Check", font=self.small_font)
         self.call_button = tk.Button(self.button_frame, text="Call", font=self.small_font)
@@ -211,58 +219,58 @@ class GameFrame(tk.Frame):
         self.raise_button.pack(side=tk.LEFT, padx=10)
 
         self.raise_slider = tk.Scale(self.user_frame, from_=0, to=self.game.user.chips, orient=tk.HORIZONTAL,
-                                     font=self.small_font)
+                                     font=self.small_font, length=500, tickinterval=1000, resolution=50, showvalue=True)
 
         self.user_hole_cards_frame.pack(side=tk.TOP)
         self.user_chips_label.pack(side=tk.TOP)
         self.user_role_label.pack(side=tk.TOP)
         self.button_frame.pack(side=tk.TOP)
-        self.raise_slider.pack(side=tk.TOP)
+        self.raise_slider.pack(side=tk.TOP, pady=(10, 0))
 
-        self.user_frame.pack(side=tk.TOP, fill=tk.X)
+        self.user_frame.pack(side=tk.TOP, fill=tk.X, pady=(0, 50))
 
-    def update(self):
-        # TODO:
-        # Update bot frame
-        self.bot_chips_label.config(text=self.game.bot.chips)
-        self.bot_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB')
+        # Exit button
+        self.label2 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+        self.label2.pack()
+        self.label2.bind('<Enter>', lambda event, lbl=self.label2: self.on_enter(lbl, event))
+        self.label2.bind('<Leave>', lambda event, lbl=self.label2: self.on_leave(lbl, event))
+        self.label2.bind('<Button-1>', lambda event: self.exit(event))
 
-        # Update community cards frame
-        self.pot_label.config(text=self.game.pot)
+    def on_enter(self, label, event):
+        label.config(fg=self.window.accent_color)
 
-        # Remove all the card labels
-        for label in self.community_cards_labels:
-            label.destroy()
-            self.community_cards_labels.remove(label)
+    def on_leave(self, label, event):
+        label.config(fg=self.window.fg_color)
 
-        # Add new ones
-        for card in self.game.community_cards:
-            if card.suit == 1 or card.suit == 2:
-                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
-                                 foreground=self.red_card_color, background=self.bg_card_color)
-            else:
-                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
-                                 foreground=self.black_card_color, background=self.bg_card_color)
-            self.community_cards_labels.append(label)
-            label.pack(side=tk.LEFT, padx=10, pady=20)
+    def exit(self, event):
+        self.pack_forget()
+        self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Update users frame
 
-        # Remove all the card labels
-        for label in self.user_cards_labels:
-            label.destroy()
-            self.user_cards_labels.remove(label)
-
-        # Add new ones
-        for card in self.game.user.hole_cards:
-            if card.suit == 1 or card.suit == 2:
-                label = tk.Label(self.user_frame, text=str(card), font=self.big_font,
-                                 foreground=self.red_card_color, background=self.bg_card_color)
-            else:
-                label = tk.Label(self.user_frame, text=str(card), font=self.big_font,
-                                 foreground=self.black_card_color, background=self.bg_card_color)
-            self.user_cards_labels.append(label)
-            label.pack(side=tk.LEFT, padx=10, pady=20)
+# def update_bot_frame(self):
+#         # TODO:
+#         # Update bot frame
+#         self.bot_chips_label.config(text=self.game.bot.chips)
+#         self.bot_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB')
+# def update_community_cards(self):
+#         # Update community cards frame
+#         self.pot_label.config(text=self.game.pot)
+#
+#         # Remove all the card labels
+#         for label in self.community_cards_labels:
+#             label.destroy()
+#             self.community_cards_labels.remove(label)
+#
+#         # Add new ones
+#         for card in self.game.community_cards:
+#             if card.suit == 1 or card.suit == 2:
+#                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+#                                  foreground=self.red_card_color, background=self.bg_card_color)
+#             else:
+#                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+#                                  foreground=self.black_card_color, background=self.bg_card_color)
+#             self.community_cards_labels.append(label)
+#             label.pack(side=tk.LEFT, padx=10, pady=20)
 
 
 class TutorialsFrame(tk.Frame):

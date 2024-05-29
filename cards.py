@@ -1,3 +1,5 @@
+import main
+import frames
 import random
 import numpy as np
 import copy
@@ -91,14 +93,14 @@ class Bot(Player):
         self.tree_map = self.load_strategies()
 
     def load_strategies(self):
-        pass
+        return {}
 
     def update_info_set(self):
         sorted_cards = sorted(self.hole_cards + self.game.community_cards, key=lambda card: (card.rank, card.suit))
         self.info_set = ''.join(str(card) for card in sorted_cards)
 
     def ask_action(self):
-        print(self.info_set)
+        # print(self.info_set)
 
         fold = ('fold', 0, 'p')
         check = ('check', 0, 'p')
@@ -117,11 +119,15 @@ class Bot(Player):
             'TP': [0.1, 0.25, 0.4, 0.1, 0.05, 0.05, 0.05],
             'LP': [0.1, 0.3, 0.4, 0.1, 0.05, 0.03, 0.02]
         }
-        base_strategy = base_strategies[self.style]
+
+        if self.info_set in self.tree_map:
+            strategy = self.tree_map[self.info_set]
+        else:
+            strategy = base_strategies[self.style]
 
         while True:
             # Returns a list of 1 element, so we need an index at the end
-            action = random.choices(actions, weights=base_strategy)[0]
+            action = random.choices(actions, weights=strategy)[0]
             # print(action)
             try:
                 # Remove unnecessary folds first
@@ -193,10 +199,16 @@ class Game:
         self.window = window
 
         # Parameters of the game
-        self.starting_chips = 10000
-        self.small_blind = 250
-        self.increasing_blinds = False
-        self.playing_style = 'Optimal'
+        if self.frame and self.window:
+            self.starting_chips = self.window.settings_frame.starting_chips.get()
+            self.small_blind = self.window.settings_frame.blind_size.get()
+            self.increasing_blinds = self.window.settings_frame.blind_increase.get()
+            self.playing_style = self.window.settings_frame.selected_style.get()
+        else:
+            self.starting_chips = 10000
+            self.small_blind = 250
+            self.increasing_blinds = 0
+            self.playing_style = 'Optimal'
 
         # User
         self.user = User()

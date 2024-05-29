@@ -98,6 +98,8 @@ class Bot(Player):
         self.info_set = ''.join(str(card) for card in sorted_cards)
 
     def ask_action(self):
+        print(self.info_set)
+
         fold = ('fold', 0, 'p')
         check = ('check', 0, 'p')
         call = ('call', self.game.user.bet - self.bet, 'c')
@@ -127,6 +129,7 @@ class Bot(Player):
                     action = check
                 self.validate_action(action)
                 print(f'{self}: {action}')
+                self.info_set += action[2]
                 return action[0], action[1]
             except ValueError:
                 continue
@@ -254,20 +257,24 @@ class Game:
             print(f':::: BB: {self.players[self.bb_pos].name}')
 
             self.deal_hole_cards()
+            self.bot.update_info_set()
             print(f':::: Dealing hole cards: {self.user.name} - {[str(card) for card in self.user.hole_cards]}, {self.bot.name} - {[str(card) for card in self.bot.hole_cards]}')
             print()
             print(f':::: Preflop')
 
             if self.bidding(preflop=True):
                 self.deal_community_cards(3)
+                self.bot.update_info_set()
                 print()
                 print(f':::: Flop: {[str(card) for card in self.community_cards]}')
                 if self.bidding():
                     self.deal_community_cards(1)
+                    self.bot.update_info_set()
                     print()
                     print(f':::: Turn: {[str(card) for card in self.community_cards]}')
                     if self.bidding():
                         self.deal_community_cards(1)
+                        self.bot.update_info_set()
                         print()
                         print(f':::: River: {[str(card) for card in self.community_cards]}')
                         if self.bidding():
@@ -359,12 +366,12 @@ class Game:
                     # Bet the full big blind
                     player.make_bet(self.big_blind - player.bet)
                     print(f'{opponent.name} is already all-in')
+                    self.bot.info_set += 'c'
                     return True
-                elif act == 'raise':
-                    pass
                 elif act == 'fold':
                     player.fold = True
                     print(f'{player.name} has folded')
+                    self.bot.info_set += 'p'
                     return False
                 else:
                     raise ValueError('Invalid action')
@@ -389,17 +396,20 @@ class Game:
             if act == 'fold':
                 player.fold = True
                 print(f'{player.name} has folded')
+                self.bot.info_set += 'p'
                 return False
 
             elif act == 'check':
                 if player.bet != opponent.bet:
                     raise ValueError('Invalid action')
                 else:
+                    self.bot.info_set += 'p'
                     if asked >= 2:
                         return True
 
             elif act == 'call':
                 if player.bet < opponent.bet:
+                    self.bot.info_set += 'c'
                     player.make_bet(opponent.bet - player.bet)
                 else:
                     raise ValueError('Invalid action')
@@ -413,9 +423,11 @@ class Game:
                 if self.min_bet <= bet < player.chips and opponent.bet - player.bet < bet:
                     # Usual case, bet is greater than minimum bet
                     player.make_bet(bet)
+                    self.bot.info_set += 'b'
                 elif bet == player.chips and opponent.bet - player.bet < bet:
                     # All in case, bet can be less than minimum bet
                     player.make_bet(bet)
+                    self.bot.info_set += 'b'
                 else:
                     raise ValueError('Invalid action')
 

@@ -140,6 +140,9 @@ class Bot(Player):
             except ValueError:
                 continue
 
+        if self.frame:
+            self.frame.update()
+
     def validate_action(self, action):
         act, bet = action[0], action[1]
         opponent = self.game.user
@@ -187,6 +190,8 @@ class User(Player):
     #
     #     act, bet = self.action, self.action_bet
     #     self.action, self.action_bet = None, None
+    #     if self.frame:
+    #         self.frame.update()
     #
     #     return act, bet
 

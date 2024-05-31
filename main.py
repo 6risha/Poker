@@ -20,7 +20,7 @@ class MainWindow(tk.Tk):
 
         self.tutorials_frame = TutorialsFrame(self)
         self.settings_frame = SettingsFrame(self)
-        self.game_frame = GameFrame(self)
+        self.game_frame = None
         self.analysis_frame = AnalysisFrame(self)
         self.tutorials1 = Tutorial1(self)
         self.tutorials2 = Tutorial2(self)

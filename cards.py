@@ -140,9 +140,6 @@ class Bot(Player):
             except ValueError:
                 continue
 
-        if self.frame:
-            self.frame.update()
-
     def validate_action(self, action):
         act, bet = action[0], action[1]
         opponent = self.game.user
@@ -198,17 +195,16 @@ class User(Player):
 
 class Game:
     # This class is implemented only for heads-up poker
-    def __init__(self, frame=None, window=None):
+    def __init__(self, frame=None):
         # Pointer to the frame
         self.frame = frame
-        self.window = window
 
         # Parameters of the game
-        if self.frame and self.window:
-            self.starting_chips = self.window.settings_frame.starting_chips.get()
-            self.small_blind = self.window.settings_frame.blind_size.get()
-            self.increasing_blinds = self.window.settings_frame.blind_increase.get()
-            self.playing_style = self.window.settings_frame.selected_style.get()
+        if self.frame is not None:
+            self.starting_chips = self.frame.game_params['starting_chips']
+            self.small_blind = self.frame.game_params['blind_size']
+            self.increasing_blinds = self.frame.game_params['blind_increase']
+            self.playing_style = self.frame.game_params['selected_style']
         else:
             self.starting_chips = 10000
             self.small_blind = 250
@@ -266,16 +262,12 @@ class Game:
         while self.user.chips > 0 and self.bot.chips > 0:
             print(f':::: Hand #{i}')
             print()
-            if self.frame:
-                self.frame.update()
             # Preflop
             self.players[self.sb_pos].make_bet(self.small_blind)
             print(f':::: SB: {self.players[self.sb_pos].name}')
 
             self.players[self.bb_pos].make_bet(self.big_blind)
             print(f':::: BB: {self.players[self.bb_pos].name}')
-            if self.frame:
-                self.frame.update()
 
             self.deal_hole_cards()
             self.bot.update_info_set()
@@ -288,57 +280,44 @@ class Game:
                 self.bot.update_info_set()
                 print()
                 print(f':::: Flop: {[str(card) for card in self.community_cards]}')
-                if self.frame:
-                    self.frame.update()
+
                 if self.bidding():
                     self.deal_community_cards(1)
                     self.bot.update_info_set()
                     print()
                     print(f':::: Turn: {[str(card) for card in self.community_cards]}')
-                    if self.frame:
-                        self.frame.update()
+
                     if self.bidding():
                         self.deal_community_cards(1)
                         self.bot.update_info_set()
                         print()
                         print(f':::: River: {[str(card) for card in self.community_cards]}')
-                        if self.frame:
-                            self.frame.update()
+
                         if self.bidding():
                             print()
                             print(":::: Showdown:")
                             self.winner = self.determine_winner()
-                            if self.frame:
-                                self.frame.update()
+
                         else:
                             self.winner = self.post_fold_determine_winner()
-                            if self.frame:
-                                self.frame.update()
+
                     else:
                         self.winner = self.post_fold_determine_winner()
-                        if self.frame:
-                            self.frame.update()
+
                 else:
                     self.winner = self.post_fold_determine_winner()
-                    if self.frame:
-                        self.frame.update()
+
             else:
                 self.winner = self.post_fold_determine_winner()
-                if self.frame:
-                    self.frame.update()
 
             if self.winner is not None:
                 print(f':::: Winner: {self.winner.name}')
                 self.winner.chips += self.pot
-                if self.frame:
-                    self.frame.update()
             else:
                 print()
                 print(f':::: It is a draw')
                 self.user.chips += self.pot//2
                 self.bot.chips += self.pot//2
-                if self.frame:
-                    self.frame.update()
 
             self.player_chips['Player1'].append(self.user.chips)
             self.player_chips['Player2'].append(self.bot.chips)

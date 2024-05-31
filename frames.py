@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 from cards import *
 from tests import create_hand
 from analysis.analysis import *
+import webbrowser
 import os
 
 
@@ -568,7 +569,6 @@ class Tutorial3(tk.Frame):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
 
-
 class Tutorial4(tk.Frame):
     def __init__(self, window):
         super().__init__(window)
@@ -587,7 +587,7 @@ class Tutorial4(tk.Frame):
         self.leave_tuto.bind('<Leave>', lambda event, lbl=self.leave_tuto: self.on_leave(lbl, event))
         self.leave_tuto.bind('<Button-1>', lambda event: self.exit(event))
 
-        self.main_label = tk.Label(self, text="4: Practice and Improvement", bg='gray18', fg='white',
+        self.main_label = tk.Label(self, text="Additional resources", bg='gray18', fg='white',
                                    font=self.big_font)
         self.main_label.pack(pady=20)
 
@@ -595,43 +595,9 @@ class Tutorial4(tk.Frame):
         self.button_frame.pack()
 
         #########################################
-
-        self.text_2 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
-                              font=self.text_font)
-        self.text_2.pack(expand=True, fill='both', padx=20, pady=20)
-
-        self.text_2.tag_configure("big", font=("Lato", 20))
-        self.text_2.tag_configure("small", font=("Lato", 10))
-        self.text_2.tag_configure("bold", font=("Lato", 13, "bold"))
-        self.text_2.tag_configure("italic", font=("Lato", 13, "italic"))
-
-        self.subtitle1 = "Basic strategy\n\n"
-        self.text_2.insert(tk.END, self.subtitle1, "big")
-
-        # Insert some initial text without explicit newlines
-        self.long_text_2 = (
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-            "\n\n"
-        )
-        self.text_2.insert(tk.END, self.long_text_2)
-
-        self.subtitle1 = "Gameplay and betting structure\n\n"
-        self.text_2.insert(tk.END, self.subtitle1, "big")
-
-        self.long_text_2_1 = (
-            "..."
-        )
-        self.text_2.insert(tk.END, self.long_text_2_1)
+        self.link = tk.Label(self, text="Great playlist to learn from a poker expert", bg='white', fg="blue", font=self.text_font, cursor="hand2")
+        self.link.pack(pady=20)
+        self.link.bind("<Button-1>", lambda e: webbrowser.open_new("https://www.youtube.com/watch?v=iPByaVUKI90&list=PL3N4X2KgtefdYT6dGleeoN00XxBbhZZ0V"))
 
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
@@ -642,7 +608,6 @@ class Tutorial4(tk.Frame):
     def exit(self, event):
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
-
 
 class AnalysisFrame(tk.Frame):
     def __init__(self, window):

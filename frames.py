@@ -546,9 +546,9 @@ class Tutorial2(tk.Frame):
 
         # Load the image using PhotoImage
         self.image1 = tk.PhotoImage(file="images/poker_cards.png")
-        # resize_image = image.resize((width, height))
+        self.resized_image1 = self.image1.subsample(2, 2)
         # Insert the image into the Text widget at the beginning of the second line
-        self.text_2.image_create(tk.END, image=self.image1)
+        self.text_2.image_create(tk.END, image=self.resized_image1)
 
         self.text_2_2 = (
         "Moreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
@@ -561,7 +561,7 @@ class Tutorial2(tk.Frame):
 
         # Load the image using PhotoImage
         self.image2 = tk.PhotoImage(file="images/poker_odds.png")
-        # resize_image = image.resize((width, height))
+        self.resized_image2 = self.image2.subsample(2, 2)
         # Insert the image into the Text widget at the beginning of the second line
         self.text_2.image_create(tk.END, image=self.image2)
 

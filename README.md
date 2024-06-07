@@ -37,4 +37,4 @@ PH is going to write this
   [YouTube](https://www.youtube.com/watch?v=Qz3kSJv_9mE&list=PLoQ2rCmr5jLhPkzClcgRHyz5iLldf-5l3&index=3)
 
 ## Attributions
-App icon: [Poker chips icons](https://www.flaticon.com/free-icons/poker-chips) created by Freepik - Flaticon
+All the pictures were taken from [flaticon.com](https://www.flaticon.com/)

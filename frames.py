@@ -433,7 +433,7 @@ class Tutorial1(tk.Frame):
         self.text_1 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
                               font=self.text_font)
         self.text_1.pack(expand=True, fill='both', padx=20, pady=20)
-        self.text_1.config(state=tk.DISABLED)
+        #self.text_1.config(state=tk.DISABLED)
 
         self.text_1.tag_configure("big", font=("Lato", 20))
         self.text_1.tag_configure("small", font=("Lato", 10))
@@ -525,7 +525,7 @@ class Tutorial2(tk.Frame):
         self.text_2 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
                               font=self.text_font)
         self.text_2.pack(expand=True, fill='both', padx=20, pady=20)
-        self.text_2.config(state=tk.DISABLED)
+        #self.text_2.config(state=tk.DISABLED)
 
         self.text_2.tag_configure("big", font=("Lato", 20))
         self.text_2.tag_configure("small", font=("Lato", 10))
@@ -551,7 +551,7 @@ class Tutorial2(tk.Frame):
         self.text_2.image_create(tk.END, image=self.resized_image1)
 
         self.text_2_2 = (
-        "Moreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
+        "\nMoreover, hands with a difference higher than 4 are to be avoided for high raises and calls, as they are disadvantageous to make a straight with.\n"
         "Of course, a straight can still be had, but only with one card as the two are too far apart to be on the same straight, meaning that 4 cards are dealt on the table in a straight configuration, making it easy for other players to also have a straight.\n\n"
         "Between all these cases there are a lot of other ordinary hands, but in general, the higher the values of the cards the better. \n\n")
         self.text_2.insert(tk.END, self.text_2_2)
@@ -563,10 +563,10 @@ class Tutorial2(tk.Frame):
         self.image2 = tk.PhotoImage(file="images/poker_odds.png")
         self.resized_image2 = self.image2.subsample(2, 2)
         # Insert the image into the Text widget at the beginning of the second line.
-        self.text_2.image_create(tk.END, image=self.image2)
+        self.text_2.image_create(tk.END, image=self.resized_image2)
 
         self.long_text_2_1 = (
-            "In pre-flo, each hand has a certain probability of winning, classified in the poker hand power chart. In this chart, all the possible hands are represented.\n\n"
+            "\nIn pre-flo, each hand has a certain probability of winning, classified in the poker hand power chart. In this chart, all the possible hands are represented.\n\n"
             "The “o” means off-suit, “s” means suited, meaning that they are the same colour or oppositely two different colours.\n"
             "The number associated to the hand is the percentage of hands that are stronger.\n"
             "So, for a pair of aces, this number is 0, as 0% of hands are stronger.\n\n"
@@ -618,7 +618,7 @@ class Tutorial3(tk.Frame):
         self.text_3 = tk.Text(self, wrap=tk.WORD, bg='gray18', fg='white',
                               font=self.text_font)
         self.text_3.pack(expand=True, fill='both', padx=20, pady=20)
-        self.text_3.config(state=tk.DISABLED)
+        #self.text_3.config(state=tk.DISABLED)
 
         self.text_3.tag_configure("big", font=("Lato", 20))
         self.text_3.tag_configure("small", font=("Lato", 10))
@@ -639,11 +639,11 @@ class Tutorial3(tk.Frame):
         self.text_3.insert(tk.END, self.long_text_3)
 
         # Load the image using PhotoImage
-        self.image = tk.PhotoImage(file="images/poker_serious_guy.png")
-        # resize_image = image.resize((width, height))
-        self.text_3.image_create(tk.END, image=self.image)
+        self.image3 = tk.PhotoImage(file="images/poker_serious_guy.png")
+        self.resized_image3 = self.image3.subsample(2, 2)
+        self.text_3.image_create(tk.END, image=self.resized_image3)
 
-        self.subtitle1 = "Opponents and table dynamics\n\n"
+        self.subtitle1 = "\nOpponents and table dynamics\n\n"
         self.text_3.insert(tk.END, self.subtitle1, "big")
 
         self.long_text_3_1 = (

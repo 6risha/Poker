@@ -1,10 +1,9 @@
+import os
+import webbrowser
 import tkinter as tk
 from PIL import Image, ImageTk
 from cards import *
-from tests import create_hand
 from analysis.analysis import *
-import webbrowser
-import os
 
 
 class StartFrame(tk.Frame):
@@ -60,8 +59,9 @@ class StartFrame(tk.Frame):
     def open_next(self, menu, event):
         self.pack_forget()
         if menu == 'Game':
+            self.window.game_frame = GameFrame(self.window)
             self.window.game_frame.pack(fill=tk.BOTH, expand=True)
-            # self.window.game_frame.game.play()
+            self.window.game_frame.game.play()
         elif menu == 'Tutorials':
             self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)
         elif menu == 'Analysis':
@@ -79,11 +79,18 @@ class SettingsFrame(tk.Frame):
         self.big_font = ('Courier New', 40, 'bold')
         self.small_font = ('Courier New', 24, 'bold')
 
+        self.settings = {
+            'blind_size': 250,
+            'starting_chips': 5000,
+            'blind_increase': 0,
+            'selected_style': 'Optimal'
+        }
+
         # Set blinds sizes
         self.blind_size = tk.IntVar()
         self.min_blind_size = 250
         self.max_blind_size = 1000
-        self.blind_size.set(345)
+        # self.blind_size.set(345)
         self.scale1 = tk.Scale(self, orient='horizontal', from_=self.min_blind_size, to=self.max_blind_size,
                                tickinterval=250, length=400, label='Small blind size', variable=self.blind_size,
                                resolution=250, font=self.small_font)
@@ -93,7 +100,7 @@ class SettingsFrame(tk.Frame):
         self.starting_chips = tk.IntVar()
         self.min_chips = 5000
         self.max_chips = 15000
-        self.starting_chips.set(6000)
+        # self.starting_chips.set(6000)
         self.scale2 = tk.Scale(self, orient='horizontal', from_=self.min_chips, to=self.max_chips + 2000,
                                tickinterval=5000, length=400, label='Starting chips', variable=self.starting_chips,
                                resolution=5000, font=self.small_font)
@@ -101,7 +108,7 @@ class SettingsFrame(tk.Frame):
 
         # Blind increase
         self.blind_increase = tk.IntVar()
-        self.blind_increase.set(0)
+        # self.blind_increase.set(0)
         self.scale3 = tk.Scale(self, orient='horizontal', from_=0, to=1, length=300, label='Blind increase',
                                variable=self.blind_increase, tickinterval=1, font=self.small_font)
         self.scale3.pack(pady=30, padx=10)
@@ -109,12 +116,17 @@ class SettingsFrame(tk.Frame):
         # Bot playing style
         self.styles = ["Optimal", "LAG", "TAG", "TP", "LP"]
         self.selected_style = tk.StringVar()
-        self.selected_style.set(self.styles[0])
+        # self.selected_style.set(self.styles[0])
         self.scale4 = tk.Scale(self, from_=0, to=len(self.styles) - 1, length=300, label="Bot style",
                                orient=tk.HORIZONTAL, command=self.update_label, showvalue=False, font=self.small_font)
         self.scale4.pack(pady=(30, 10), padx=10)
         self.label1 = tk.Label(self, text=self.styles[0], font=self.small_font)
         self.label1.pack(pady=(0, 30))
+
+        # Save button
+        self.button1 = tk.Button(self, text="Save", font=self.big_font)
+        self.button1.bind("<Button-1>", self.update_settings)
+        self.button1.pack()
 
         # Exit button
         self.label2 = tk.Label(self, text='<<', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
@@ -138,6 +150,15 @@ class SettingsFrame(tk.Frame):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
+    def update_settings(self, event):
+        self.settings = {
+            'blind_size': self.blind_size.get(),
+            'starting_chips': self.starting_chips.get(),
+            'blind_increase': self.blind_increase.get(),
+            'selected_style': self.selected_style.get()
+        }
+        # print(self.settings)
+
 
 class GameFrame(tk.Frame):
     def __init__(self, window):
@@ -146,9 +167,12 @@ class GameFrame(tk.Frame):
         self.window = window
         self.configure(bg=self.window.bg_color)
 
-        self.game = Game(frame=self, window=self.window)
-        self.game.community_cards = create_hand(['3♠', '7♦', '9♠', '10♣', 'Q♠'])
-        self.game.user.hole_cards = create_hand(['9♦', '8♠'])
+        self.game_params = self.window.settings_frame.settings
+        # print(f'game parameters : {self.game_params}')
+        self.game = Game(frame=self)
+
+        # self.game.community_cards = create_hand(['3♠', '7♦', '9♠', '10♣', 'Q♠'])
+        # self.game.user.hole_cards = create_hand(['9♦', '8♠'])
 
         self.table_color = 'forestgreen'
         self.red_card_color = 'firebrick2'
@@ -161,12 +185,15 @@ class GameFrame(tk.Frame):
         # Bot Frame
         self.bot_frame = tk.Frame(self)
         self.bot_frame.configure(bg=self.window.bg_color)
+        self.bot_bet_label = tk.Label(self.bot_frame, text=self.game.bot.bet, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.bot_style_label = tk.Label(self.bot_frame, text=self.game.bot.style, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.bot_chips_label = tk.Label(self.bot_frame, text=self.game.bot.chips, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.bot_role_label = tk.Label(self.bot_frame, text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB', font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
+
         self.bot_style_label.pack()
-        self.bot_chips_label.pack()
         self.bot_role_label.pack()
+        self.bot_chips_label.pack()
+        self.bot_bet_label.pack()
         self.bot_frame.pack(side=tk.TOP, fill=tk.X, pady=(0, 50))
 
         # Community Cards Frame
@@ -190,6 +217,7 @@ class GameFrame(tk.Frame):
         # User Frame
         self.user_frame = tk.Frame(self)
         self.user_frame.configure(bg=self.window.bg_color)
+        self.user_bet_label = tk.Label(self.user_frame, text=self.game.user.bet, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.user_chips_label = tk.Label(self.user_frame, text=self.game.user.chips, font=self.big_font, bg=self.window.bg_color, fg=self.window.fg_color)
         self.user_role_label = tk.Label(self.user_frame,
                                         text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB',
@@ -210,9 +238,13 @@ class GameFrame(tk.Frame):
         self.button_frame = tk.Frame(self.user_frame)
         self.button_frame.configure(bg=self.window.bg_color)
         self.fold_button = tk.Button(self.button_frame, text="Fold", font=self.small_font)
+        self.fold_button.bind("<Button-1>", self.fold)
         self.check_button = tk.Button(self.button_frame, text="Check", font=self.small_font)
+        self.check_button.bind("<Button-1>", self.check)
         self.call_button = tk.Button(self.button_frame, text="Call", font=self.small_font)
+        self.call_button.bind("<Button-1>", self.call)
         self.raise_button = tk.Button(self.button_frame, text="Raise", font=self.small_font)
+        self.raise_button.bind("<Button-1>", self.do_raise)
 
         self.fold_button.pack(side=tk.LEFT, padx=10)
         self.check_button.pack(side=tk.LEFT, padx=10)
@@ -222,6 +254,7 @@ class GameFrame(tk.Frame):
         self.raise_slider = tk.Scale(self.user_frame, from_=0, to=self.game.user.chips, orient=tk.HORIZONTAL,
                                      font=self.small_font, length=500, tickinterval=1000, resolution=50, showvalue=True)
 
+        self.user_bet_label.pack(side=tk.TOP)
         self.user_hole_cards_frame.pack(side=tk.TOP)
         self.user_chips_label.pack(side=tk.TOP)
         self.user_role_label.pack(side=tk.TOP)
@@ -237,6 +270,26 @@ class GameFrame(tk.Frame):
         self.label2.bind('<Leave>', lambda event, lbl=self.label2: self.on_leave(lbl, event))
         self.label2.bind('<Button-1>', lambda event: self.exit(event))
 
+    def fold(self, event):
+        self.game.user.action = 'fold'
+        self.game.user.action_bet = 0
+        self.update_after_user_action()
+
+    def check(self, event):
+        self.game.user.action = 'check'
+        self.game.user.action_bet = 0
+        self.update_after_user_action()
+
+    def call(self, event):
+        self.game.user.action = 'check'
+        self.game.user.action_bet = 0
+        self.update_after_user_action()
+
+    def do_raise(self, event):
+        self.game.user.action = 'check'
+        self.game.user.action_bet = self.raise_slider.get()
+        self.update_after_user_action()
+
     def on_enter(self, label, event):
         label.config(fg=self.window.accent_color)
 
@@ -247,31 +300,43 @@ class GameFrame(tk.Frame):
         self.pack_forget()
         self.window.start_frame.pack(fill=tk.BOTH, expand=True)
 
+    def update_after_user_action(self):
+        self.pot_label.config(text=self.game.pot)
+        self.user_bet_label.config(text=self.game.user.bet)
+        self.user_chips_label.config(text=self.game.user.chips)
 
-# def update_bot_frame(self):
-#         # TODO:
-#         # Update bot frame
-#         self.bot_chips_label.config(text=self.game.bot.chips)
-#         self.bot_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB')
-# def update_community_cards(self):
-#         # Update community cards frame
-#         self.pot_label.config(text=self.game.pot)
-#
-#         # Remove all the card labels
-#         for label in self.community_cards_labels:
-#             label.destroy()
-#             self.community_cards_labels.remove(label)
-#
-#         # Add new ones
-#         for card in self.game.community_cards:
-#             if card.suit == 1 or card.suit == 2:
-#                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
-#                                  foreground=self.red_card_color, background=self.bg_card_color)
-#             else:
-#                 label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
-#                                  foreground=self.black_card_color, background=self.bg_card_color)
-#             self.community_cards_labels.append(label)
-#             label.pack(side=tk.LEFT, padx=10, pady=20)
+    def update_after_bot_action(self):
+        self.pot_label.config(text=self.game.pot)
+        self.bot_bet_label.config(text=self.game.bot.bet)
+        self.bot_chips_label.config(text=self.game.bot.chips)
+
+    def update_game_state(self):
+        # print('i was here')
+
+        self.pot_label.config(text=self.game.pot)
+        self.user_bet_label.config(text=self.game.user.bet)
+        self.user_chips_label.config(text=self.game.user.chips)
+        self.bot_bet_label.config(text=self.game.bot.bet)
+        self.bot_chips_label.config(text=self.game.bot.chips)
+
+        # Update community cards
+        for label in self.community_cards_labels:
+            label.destroy()
+            self.community_cards_labels.remove(label)
+
+        for card in self.game.community_cards:
+            if card.suit == 1 or card.suit == 2:
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.red_card_color, background=self.bg_card_color)
+            else:
+                label = tk.Label(self.community_cards_frame, text=str(card), font=self.big_font,
+                                 foreground=self.black_card_color, background=self.bg_card_color)
+            self.community_cards_labels.append(label)
+            label.pack(side=tk.LEFT, padx=10, pady=20)
+
+        # Update positions
+        self.bot_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.bot else 'BB')
+        self.user_role_label.config(text='SB' if self.game.players[self.game.sb_pos] == self.game.user else 'BB')
 
 
 class TutorialsFrame(tk.Frame):

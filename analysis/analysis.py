@@ -10,7 +10,6 @@ class Analise:
         super().__init__()
         self.name = df2
         self.plot_name = ''
-        self.df = pd.read_csv(df2, delimiter='\t')
         self.df2 = pd.read_csv(df2, delimiter='\t', skiprows=[0, 1])
         self.df3 = pd.read_csv(df2, delimiter='\t', nrows=2)
         self.player_list = []
@@ -59,7 +58,7 @@ class Analise:
         players = self.player_list2()
         hands = self.count_hands2()
         for i in range(hands):
-            x.append(i+1)
+            x.append(i + 1)
         for k in range(len(players)):
             data = self.player_data_2(players[k][1])
             for j in range(len(data)):
@@ -112,6 +111,7 @@ class StoreData:
             self.data['Player1'].append(self.dico['Player1'][i])
             self.data['Player2'].append(self.dico['Player2'][i])
             self.data['ChipStart'].append(i)
+
     def write_to_file(self):
         """
         :return: Writes data to a txt file and saves it to the history directory

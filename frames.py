@@ -721,8 +721,8 @@ class AnalysisFrame(tk.Frame):
 
         self.img = tk.PhotoImage(file='images/analyste-daffaires.png')
         self.img = self.img.subsample(2)
-        self.img_label = tk.Label(self, image=self.img, bg=self.window.bg_color)
-        self.img_label.pack(side=tk.TOP)
+        self.img_label = tk.Label(self, image=self.img, bg=self.window.bg_color) # Taken from Chat-GPT
+        self.img_label.pack(side=tk.TOP) # Taken from Chat-GPT
 
         self.button = []
         for file in os.listdir('analysis/history'):

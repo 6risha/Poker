@@ -562,7 +562,7 @@ class Tutorial2(tk.Frame):
         # Load the image using PhotoImage
         self.image2 = tk.PhotoImage(file="images/poker_odds.png")
         self.resized_image2 = self.image2.subsample(2, 2)
-        # Insert the image into the Text widget at the beginning of the second line
+        # Insert the image into the Text widget at the beginning of the second line.
         self.text_2.image_create(tk.END, image=self.image2)
 
         self.long_text_2_1 = (

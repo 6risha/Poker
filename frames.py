@@ -675,7 +675,7 @@ class Tutorial3(tk.Frame):
     def exit(self, event):
         """
         :param event:
-        Closes the tutorial3 window and goes back to main tutorial window
+        Closes the tutorial3 window and goes back to main tutorial window.
         """
         self.pack_forget()
         self.window.tutorials_frame.pack(fill=tk.BOTH, expand=True)

@@ -3,7 +3,7 @@
 
 ## Overview
 
-PH is going to write this
+The aim of this project is to be able to play heads-up Texas Hold'em against a bot with tkinter. The preliminary steps of bot training with CFR have been done, it is functional to get pre-trained strategies. Unfortunately, we did not have time to properly train it as it was very time consuming but we had a clear idea of how it should be done. The game is functional as we wrote basic strategies for the bot. The player has the ability to choose the settings he wants to play with. Also, the player can have access to the analysis of his previous games through some graphs showing the evolution of the chip count as the game went on. Finally, tutorials are available to explain the rules for those who are not compfortable with the rules of Poker.
 
 ## Screenshots
 
